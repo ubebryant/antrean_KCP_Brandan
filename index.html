@@ -6,7 +6,7 @@
     <title>Panel Petugas - Bank SUMUT Online</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght=700&display=swap');
         .font-digital { font-family: 'Orbitron', sans-serif; }
     </style>
 </head>
@@ -119,7 +119,7 @@
             document.getElementById('live-cs').innerText = 'CS-' + String(currentData.cs || 0).padStart(3, '0');
             document.getElementById('live-teller').innerText = 'TL-' + String(currentData.teller || 0).padStart(3, '0');
             
-            // Render Daftar Video
+            // Render Daftar Video dengan Penambahan Tombol Putar
             const boxPlaylist = document.getElementById('list-playlist-video');
             boxPlaylist.innerHTML = "";
             if (Object.keys(rawVideoObjects).length > 0) {
@@ -127,7 +127,10 @@
                     boxPlaylist.innerHTML += `
                         <div class="flex justify-between items-center bg-white p-2 border rounded-lg shadow-sm">
                             <span class="font-mono font-bold text-gray-700">${idVideo}</span>
-                            <button onclick="hapusVideo('${key}')" class="text-red-500 font-bold hover:text-red-700 px-1 cursor-pointer">✕ Hapus</button>
+                            <div class="flex gap-3">
+                                <button onclick="putarVideoInstan('${key}')" class="text-emerald-600 font-extrabold hover:text-emerald-800 cursor-pointer">▶ Putar</button>
+                                <button onclick="hapusVideo('${key}')" class="text-red-500 font-bold hover:text-red-700 px-1 cursor-pointer">✕ Hapus</button>
+                            </div>
                         </div>`;
                 });
             } else {
@@ -150,7 +153,6 @@
             }
         });
 
-        // Filter otomatis pemotong link YouTube utuh
         function ekstrakIDYouTube(url) {
             url = url.trim();
             const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
@@ -174,18 +176,40 @@
             if(confirm("Hapus video ini dari playlist?")) { database.ref(`antrean/videos/${key}`).remove(); }
         }
 
-        // FUNGSI LANGKAH PLAY VIDEO BERIKUTNYA (NEXT PLAY)
+        // FUNGSI LOGIKA PUTAR VIDEO SECARA INSTAN SAAAT ITU JUGA
+        function putarVideoInstan(targetKey) {
+            const idVideoTarget = rawVideoObjects[targetKey];
+            if(!idVideoTarget) return;
+
+            // 1. Ambil semua data list playlist video yang ada saat ini
+            const daftarLengkap = Object.entries(rawVideoObjects);
+            
+            // 2. Kosongkan jalur database video sementara untuk menyusun ulang urutan
+            database.ref('antrean/videos').remove().then(() => {
+                
+                // 3. Masukkan video target terlebih dahulu agar berada di posisi indeks ke-0 (paling atas)
+                database.ref('antrean/videos').push(idVideoTarget).then(() => {
+                    
+                    // 4. Masukkan kembali sisa video lainnya di bawahnya
+                    daftarLengkap.forEach(([key, idVideo]) => {
+                        if(key !== targetKey) {
+                            database.ref('antrean/videos').push(idVideo);
+                        }
+                    });
+
+                });
+            });
+        }
+
         function nextVideo() {
             const keys = Object.keys(rawVideoObjects);
             if(keys.length <= 1) {
                 alert("Minimal harus ada 2 video di dalam daftar untuk menggunakan fitur Next!");
                 return;
             }
-            
             const keyPertama = keys[0];
             const idVideoPertama = rawVideoObjects[keyPertama];
 
-            // Pindahkan video pertama ke urutan paling bawah, lalu hapus posisi teratas lamanya
             database.ref('antrean/videos').push(idVideoPertama).then(() => {
                 database.ref(`antrean/videos/${keyPertama}`).remove();
             });
