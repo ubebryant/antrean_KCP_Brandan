@@ -51,7 +51,14 @@
         </div>
 
         <div class="lg:col-span-8 h-full bg-black rounded-[1.5rem] shadow-xl overflow-hidden border-2 border-white relative box-border">
-            <iframe id="youtube-player" class="absolute top-0 left-0 w-full h-full object-cover" src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&mute=1&loop=1&playlist=dQw4w9WgXcQ&enablejsapi=1" title="Video" frameborder="0" allowfullscreen></iframe>
+            <iframe id="youtube-player" 
+                class="absolute top-0 left-0 w-full h-full object-cover" 
+                src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&mute=1&loop=1&playlist=dQw4w9WgXcQ&controls=0&rel=0" 
+                title="Video" 
+                frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowfullscreen>
+            </iframe>
         </div>
     </main>
 
@@ -60,7 +67,8 @@
 
     <script>
         // ⚠️ TEMPELKAN KONFIGURASI FIREBASE YANG SAMA DI SINI
-        const firebaseConfig = {apiKey: "AIzaSyCY3RjNKQULXZmU18gxx3uKS0PE3D4kpgk",
+        const firebaseConfig = {
+            apiKey: "AIzaSyCY3RjNKQULXZmU18gxx3uKS0PE3D4kpgk",
             authDomain: "antreankcpbrandan.firebaseapp.com",
             databaseURL: "https://antreankcpbrandan-default-rtdb.asia-southeast1.firebasedatabase.app",
             projectId: "antreankcpbrandan",
@@ -72,9 +80,9 @@
 
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
-        window.loadedTime = Date.now(); // Penanda waktu aplikasi mulai aktif
+        window.loadedTime = Date.now();
 
-        // Sinkronisasi data display nomor, video, dan pengumuman
+        // SINKRONISASI DATABASES ONLINE
         database.ref('antrean').on('value', (snapshot) => {
             const data = snapshot.val() || { cs: 0, teller: 0, videoId: 'dQw4w9WgXcQ', pengumuman: '' };
             
@@ -83,17 +91,18 @@
 
             if (data.pengumuman) document.getElementById('marquee-text').innerText = data.pengumuman;
 
+            // PERBAIKAN STRUKTUR PANDUAN URL YOUTUBE EMDEBED
             const player = document.getElementById('youtube-player');
             const targetVideo = data.videoId || 'dQw4w9WgXcQ';
-            if (!player.src.includes(targetVideo)) {
-                player.src = `https://www.youtube.com/embed/${targetVideo}?autoplay=1&mute=1&loop=1&playlist=${targetVideo}&enablejsapi=1`;
+            const generatedSrc = `https://www.youtube.com/embed/${targetVideo}?autoplay=1&mute=1&loop=1&playlist=${targetVideo}&controls=0&rel=0`;
+            
+            if (player.src !== generatedSrc && !player.src.includes(targetVideo)) {
+                player.src = generatedSrc;
             }
         });
 
-        // Menangkap pemicu suara panggilan aktif
         database.ref('panggilanTerakhir').on('value', (snapshot) => {
             const data = snapshot.val();
-            // Hanya bersuara jika data ditekan setelah monitor ini menyala (menghindari suara beruntun saat refresh)
             if (data && data.timestamp > window.loadedTime) {
                 suaraPanggilan(data.nomorEjaan, data.tujuan);
             }
@@ -101,16 +110,13 @@
 
         function suaraPanggilan(nomor, tujuan) {
             try {
-                // Hentikan suara panggilan lama yang belum selesai bicara (antrean bertumpuk)
                 window.speechSynthesis.cancel();
-
                 const teks = `Nomor antrean, ${nomor}, silahkan menuju ke, ${tujuan}`;
                 const utterance = new SpeechSynthesisUtterance(teks);
                 utterance.lang = 'id-ID';
-                utterance.rate = 0.85; // Kecepatan bicara normal
-                utterance.volume = 1;  // Volume maksimal
+                utterance.rate = 0.85;
                 window.speechSynthesis.speak(utterance);
-            } catch(e){ console.log("Gagal memutar suara: ", e); }
+            } catch(e){}
         }
 
         setInterval(() => {
