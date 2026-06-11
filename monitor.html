@@ -96,11 +96,9 @@
 
         const idIndonesiaRaya = "eZgZ9eeS6Hk"; 
         const durasiLaguMilidetik = 150000;
-
-        // ATUR TINGKAT SEBERAPA KERAS VOLUME VIDEO YOUTUBE DI SINI (0 sampai 100)
         const SETTING_VOLUME_VIDEO = 20; 
 
-        // Inisialisasi YouTube Player saat API siap
+        // Inisialisasi YouTube Player
         function onYouTubeIframeAPIReady() {
             ytPlayer = new YT.Player('player', {
                 height: '100%',
@@ -122,7 +120,6 @@
         }
 
         function onPlayerReady(event) {
-            // Pasang volume pelan otomatis saat player siap
             event.target.setVolume(SETTING_VOLUME_VIDEO);
             if (isUnlocked && !isPlayingNationalAnthem) {
                 event.target.playVideo();
@@ -143,7 +140,7 @@
             }
         }
 
-        // 1. SINKRONISASI ANGKA ANTRIAN SAJA
+        // 1. SINKRONISASI ANGKA ANTRIAN
         database.ref('antrean/cs').on('value', (snapshot) => {
             const val = snapshot.val() || 0;
             document.getElementById('display-cs').innerText = 'CS-' + String(val).padStart(3, '0');
@@ -172,7 +169,6 @@
             if (currentVideos.length === 0) currentVideos.push('dQw4w9WgXcQ'); 
             
             if (ytPlayer && typeof ytPlayer.cuePlaylist === 'function' && !isPlayingNationalAnthem) {
-                // Perbarui playlist di dalam mesin YouTube tanpa me-refresh paksa player
                 const currentVideoId = ytPlayer.getVideoData()['video_id'];
                 if (currentVideoId !== currentVideos[0]) {
                     ytPlayer.loadPlaylist(currentVideos, 0, 0);
@@ -181,7 +177,7 @@
             }
         });
 
-        // PENGATUR JAM & SCHEDULER JAM 10 PAGI
+        // PENGATUR JAM & SCHEDULER INDONESIA RAYA
         setInterval(() => {
             const sekarang = new Date();
             const waktuWIB = sekarang.toLocaleTimeString('id-ID', { timeZone: 'Asia/Jakarta', hour12: false });
@@ -194,21 +190,18 @@
 
         function jalankanIndonesiaRaya() {
             if (!ytPlayer || typeof ytPlayer.loadVideoById !== 'function') return;
-            
             isPlayingNationalAnthem = true;
-            // Saat lagu kebangsaan diputar, besarkan volume ke 100% penuh otomatis
             ytPlayer.setVolume(100);
             ytPlayer.loadVideoById(idIndonesiaRaya);
 
             setTimeout(() => {
                 isPlayingNationalAnthem = false;
-                // Kembalikan ke volume musik latar pelan (20%) setelah lagu selesai
                 ytPlayer.setVolume(SETTING_VOLUME_VIDEO);
                 ytPlayer.loadPlaylist(currentVideos, 0, 0);
             }, durasiLaguMilidetik);
         }
 
-        // SUARA PANGGILAN ANTRIAN (Diatur volume penuh 100%)
+        // SUARA PANGGILAN ANTRIAN DENGAN FITUR AUTO PAUSE & AUTO PLAY
         database.ref('panggilanTerakhir').on('value', (snapshot) => {
             const data = snapshot.val();
             if (data && data.timestamp > window.loadedTime) {
@@ -219,11 +212,29 @@
         function suaraPanggilan(nomor, tujuan) {
             try {
                 window.speechSynthesis.cancel(); 
+                
                 const teks = `Nomor antrean, ${nomor}, silahkan menuju ke, ${tujuan}`;
                 const utterance = new SpeechSynthesisUtterance(teks);
                 utterance.lang = 'id-ID';
                 utterance.rate = 0.85;
-                utterance.volume = 1.0; // PENGATURAN VOLUME SUARA GOOGLE ANTRIAN (1.0 artinya Maksimal/100%)
+                utterance.volume = 1.0; 
+
+                // Aksi ketika Google TTS mulai berbicara
+                utterance.onstart = function() {
+                    // Hanya pause video jika tidak sedang memutar Lagu Indonesia Raya
+                    if (ytPlayer && typeof ytPlayer.pauseVideo === 'function' && !isPlayingNationalAnthem) {
+                        ytPlayer.pauseVideo();
+                    }
+                };
+
+                // Aksi ketika Google TTS selesai berbicara
+                utterance.onend = function() {
+                    // Putar kembali video jika tidak sedang memutar Lagu Indonesia Raya
+                    if (ytPlayer && typeof ytPlayer.playVideo === 'function' && !isPlayingNationalAnthem) {
+                        ytPlayer.playVideo();
+                    }
+                };
+
                 window.speechSynthesis.speak(utterance);
             } catch(e){}
         }
