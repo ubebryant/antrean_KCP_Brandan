@@ -56,9 +56,9 @@
             <div class="bg-white p-6 rounded-3xl shadow-lg">
                 <h3 class="font-black text-gray-700 mb-4">⚙️ CONTROL CENTER</h3>
                 
-                <label class="block text-sm font-bold text-gray-500 mb-1">Tambah ID Video YouTube Baru</label>
+                <label class="block text-sm font-bold text-gray-500 mb-1">Paste Link / ID Video YouTube Baru</label>
                 <div class="flex gap-2 mb-3">
-                    <input id="input-url-youtube" type="text" class="flex-grow p-3 bg-gray-50 border rounded-xl text-sm font-semibold text-gray-700" placeholder="Contoh: dQw4w9WgXcQ">
+                    <input id="input-url-youtube" type="text" class="flex-grow p-3 bg-gray-50 border rounded-xl text-sm font-semibold text-gray-700" placeholder="Paste link video atau ID di sini...">
                     <button onclick="tambahVideo()" class="bg-blue-900 text-white font-bold px-4 rounded-xl hover:bg-blue-950 cursor-pointer text-xs">TAMBAH</button>
                 </div>
                 <label class="block text-[11px] font-bold text-gray-400 mb-1">Daftar Video Aktif di TV:</label>
@@ -137,12 +137,34 @@
             }
         });
 
+        // FUNGSI EKSTRAKSI OTOMATIS LINK YOUTUBE
+        function ekstrakIDYouTube(url) {
+            url = url.trim();
+            // Pola regex untuk mendeteksi berbagai jenis format link YouTube
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+            const match = url.match(regExp);
+            
+            if (match && match[2].length === 11) {
+                return match[2];
+            } else if (url.length === 11) {
+                return url; // Jika user sudah menginputkan ID langsung 11 karakter
+            } else {
+                return null;
+            }
+        }
+
         function tambahVideo() {
             const input = document.getElementById('input-url-youtube');
-            const idVideo = input.value.trim();
-            if (idVideo.length === 11) {
-                database.ref('antrean/videos').push(idVideo).then(() => { input.value = ""; });
-            } else { alert("ID Video harus 11 karakter!"); }
+            const rawValue = input.value.trim();
+            const idVideo = ekstrakIDYouTube(rawValue);
+
+            if (idVideo) {
+                database.ref('antrean/videos').push(idVideo).then(() => { 
+                    input.value = ""; 
+                });
+            } else { 
+                alert("Format link tidak valid! Pastikan menyalin link video resmi dari YouTube."); 
+            }
         }
 
         function hapusVideo(key) {
