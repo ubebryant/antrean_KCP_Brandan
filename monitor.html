@@ -96,7 +96,7 @@
 
         const idIndonesiaRaya = "eZgZ9eeS6Hk"; 
         const durasiLaguMilidetik = 150000;
-        const SETTING_VOLUME_VIDEO = 10; 
+        const SETTING_VOLUME_VIDEO = 20; 
 
         // Inisialisasi YouTube Player
         function onYouTubeIframeAPIReady() {
@@ -111,6 +111,7 @@
                     'showinfo': 0,
                     'modestbranding': 1,
                     'loop': 1,
+                    'mute': 1, // KUNCI UTAMA: Mulai dalam keadaan mute agar Autoplay lolos sensor browser
                     'playlist': currentVideos.join(',')
                 },
                 events: {
@@ -120,9 +121,13 @@
         }
 
         function onPlayerReady(event) {
-            event.target.setVolume(SETTING_VOLUME_VIDEO);
-            if (isUnlocked && !isPlayingNationalAnthem) {
-                event.target.playVideo();
+            // Jalankan video secara paksa
+            event.target.playVideo();
+            
+            // Jika user sebelumnya sudah klik/mengizinkan, langsung buka mute dan set volume
+            if (isUnlocked) {
+                event.target.unMute();
+                event.target.setVolume(SETTING_VOLUME_VIDEO);
             }
         }
 
@@ -134,7 +139,9 @@
                 window.speechSynthesis.speak(new SpeechSynthesisUtterance(""));
             } catch(e){}
 
+            // Buka suara video YouTube dan set ke volume musik latar pelan
             if (ytPlayer && typeof ytPlayer.playVideo === 'function') {
+                ytPlayer.unMute();
                 ytPlayer.setVolume(SETTING_VOLUME_VIDEO);
                 ytPlayer.playVideo();
             }
@@ -172,7 +179,10 @@
                 const currentVideoId = ytPlayer.getVideoData()['video_id'];
                 if (currentVideoId !== currentVideos[0]) {
                     ytPlayer.loadPlaylist(currentVideos, 0, 0);
-                    ytPlayer.setVolume(SETTING_VOLUME_VIDEO);
+                    if (isUnlocked) {
+                        ytPlayer.unMute();
+                        ytPlayer.setVolume(SETTING_VOLUME_VIDEO);
+                    }
                 }
             }
         });
@@ -191,17 +201,22 @@
         function jalankanIndonesiaRaya() {
             if (!ytPlayer || typeof ytPlayer.loadVideoById !== 'function') return;
             isPlayingNationalAnthem = true;
+            ytPlayer.unMute();
             ytPlayer.setVolume(100);
             ytPlayer.loadVideoById(idIndonesiaRaya);
 
             setTimeout(() => {
                 isPlayingNationalAnthem = false;
-                ytPlayer.setVolume(SETTING_VOLUME_VIDEO);
+                if (isUnlocked) {
+                    ytPlayer.setVolume(SETTING_VOLUME_VIDEO);
+                } else {
+                    ytPlayer.mute();
+                }
                 ytPlayer.loadPlaylist(currentVideos, 0, 0);
             }, durasiLaguMilidetik);
         }
 
-        // SUARA PANGGILAN ANTRIAN DENGAN PERBAIKAN STABILITAS CHROME
+        // SUARA PANGGILAN ANTRIAN
         database.ref('panggilanTerakhir').on('value', (snapshot) => {
             const data = snapshot.val();
             if (data && data.timestamp > window.loadedTime) {
@@ -215,27 +230,23 @@
                 
                 const teks = `Nomor antrean, ${nomor}, silahkan menuju ke, ${tujuan}`;
                 
-                // Perbaikan utama: Mengunci ke window global agar tidak dihapus memori browser saat bersuara
                 window.currentUtterance = new SpeechSynthesisUtterance(teks);
                 window.currentUtterance.lang = 'id-ID';
                 window.currentUtterance.rate = 0.85;
                 window.currentUtterance.volume = 1.0; 
 
-                // Event ketika panggilan dimulai
                 window.currentUtterance.onstart = function() {
                     if (ytPlayer && typeof ytPlayer.pauseVideo === 'function' && !isPlayingNationalAnthem) {
                         ytPlayer.pauseVideo();
                     }
                 };
 
-                // Event ketika panggilan selesai berbicara
                 window.currentUtterance.onend = function() {
                     if (ytPlayer && typeof ytPlayer.playVideo === 'function' && !isPlayingNationalAnthem) {
                         ytPlayer.playVideo();
                     }
                 };
 
-                // Event tambahan penanganan kegagalan/interupsi suara
                 window.currentUtterance.onerror = function() {
                     if (ytPlayer && typeof ytPlayer.playVideo === 'function' && !isPlayingNationalAnthem) {
                         ytPlayer.playVideo();
