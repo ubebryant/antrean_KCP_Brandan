@@ -69,7 +69,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
     <script>
-        // KREDENSIAL AKTIF PROYEK ANTREANKCPBRANDAN
         const firebaseConfig = {
             apiKey: "AIzaSyCY3RjNKQULXZmU18gxx3uKS0PE3D4kpgk",
             authDomain: "antreankcpbrandan.firebaseapp.com",
@@ -85,25 +84,46 @@
         const database = firebase.database();
         window.loadedTime = Date.now();
 
-        // Ambil Data Antrean dari Database Cloud
+        // Sinkronisasi data real-time display TV
         database.ref('antrean').on('value', (snapshot) => {
-            const data = snapshot.val() || { cs: 0, teller: 0, videoId: 'dQw4w9WgXcQ', pengumuman: '' };
+            const data = snapshot.val() || {};
             
             document.getElementById('display-cs').innerText = 'CS-' + String(data.cs || 0).padStart(3, '0');
             document.getElementById('display-teller').innerText = 'TL-' + String(data.teller || 0).padStart(3, '0');
 
-            if (data.pengumuman) document.getElementById('marquee-text').innerText = data.pengumuman;
-
-            const player = document.getElementById('youtube-player');
-            const targetVideo = data.videoId || 'dQw4w9WgXcQ';
-            const generatedSrc = `https://www.youtube.com/embed/${targetVideo}?autoplay=1&mute=1&loop=1&playlist=${targetVideo}&controls=0&rel=0`;
+            // SISTEM DINAMIS MULTI-INFORMASI TEKS BERJALAN
+            let listTeks = [];
+            if (data.pengumumanMulti) {
+                listTeks = Object.values(data.pengumumanMulti);
+            }
             
-            if (player.src !== generatedSrc && !player.src.includes(targetVideo)) {
+            // Jika kosong di database, tampilkan teks bawaan standar
+            if (listTeks.length === 0) {
+                listTeks.push('Selamat Datang di PT. Bank SUMUT KCP Pangkalan Brandan.');
+                listTeks.push('Kepercayaan Anda adalah Prioritas Kami.');
+            }
+            // Gabungkan teks dengan pemisah estetik lingkaran spasi
+            document.getElementById('marquee-text').innerText = listTeks.join('   •   ');
+
+            // SISTEM DINAMIS PLAYLIST YOUTUBE MULTI-LINK
+            const player = document.getElementById('youtube-player');
+            let listVideo = [];
+            if (data.videos) {
+                listVideo = Object.values(data.videos);
+            }
+            if (listVideo.length === 0) {
+                listVideo.push('dQw4w9WgXcQ'); 
+            }
+            const videoUtama = listVideo[0];
+            const stringPlaylist = listVideo.join(',');
+
+            const generatedSrc = `https://www.youtube.com/embed/${videoUtama}?autoplay=1&mute=1&loop=1&playlist=${stringPlaylist}&controls=0&rel=0`;
+            if (player.src !== generatedSrc) {
                 player.src = generatedSrc;
             }
         });
 
-        // Dengarkan Trigger Suara Panggilan Masuk
+        // Suara Panggilan Masuk
         database.ref('panggilanTerakhir').on('value', (snapshot) => {
             const data = snapshot.val();
             if (data && data.timestamp > window.loadedTime) {
