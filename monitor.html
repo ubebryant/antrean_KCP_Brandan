@@ -6,7 +6,7 @@
     <title>Monitor Antrean - PT. Bank SUMUT</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght=700&display=swap');
         .font-digital { font-family: 'Orbitron', sans-serif; }
     </style>
 </head>
@@ -30,7 +30,7 @@
             <img src="Logo_Bank_Sumut.png" alt="Logo Bank SUMUT" class="h-full max-h-[50px] md:max-h-[60px] w-auto object-contain">
             <div class="h-8 w-[2px] bg-slate-300"></div>
             <div>
-                <h1 class="text-lg md:text-xl font-black tracking-tighter text-[#00205B] leading-none">KANTOR CABANG</h1>
+                <h1 class="text-lg md:text-xl font-black tracking-tighter text-[#00205B] leading-none">KCP. PANGKALAN BRANDAN</h1>
                 <p class="text-[10px] font-bold text-slate-500 tracking-widest uppercase mt-0.5">Layanan Antrean Digital Online</p>
             </div>
         </div>
@@ -102,3 +102,97 @@
         const durasiLaguMilidetik = 150000; 
 
         function unlockAudio() {
+            document.getElementById('audio-unlocker').classList.add('opacity-0', 'pointer-events-none');
+            try {
+                window.speechSynthesis.speak(new SpeechSynthesisUtterance(""));
+            } catch(e){}
+            if(urlPlaylistNormal && !isPlayingNationalAnthem) {
+                document.getElementById('youtube-player').src = urlPlaylistNormal;
+            }
+        }
+
+        // 1. SINKRONISASI ANGKA ANTRIAN SAJA
+        database.ref('antrean/cs').on('value', (snapshot) => {
+            const val = snapshot.val() || 0;
+            document.getElementById('display-cs').innerText = 'CS-' + String(val).padStart(3, '0');
+        });
+
+        database.ref('antrean/teller').on('value', (snapshot) => {
+            const val = snapshot.val() || 0;
+            document.getElementById('display-teller').innerText = 'TL-' + String(val).padStart(3, '0');
+        });
+
+        // 2. SINKRONISASI TEKS PENGUMUMAN BERJALAN
+        database.ref('antrean/pengumumanMulti').on('value', (snapshot) => {
+            let listTeks = [];
+            if (snapshot.exists()) listTeks = Object.values(snapshot.val());
+            if (listTeks.length === 0) {
+                listTeks.push('Selamat Datang di PT. Bank SUMUT KCP Pangkalan Brandan.');
+                listTeks.push('Kepercayaan Anda adalah Prioritas Kami.');
+            }
+            document.getElementById('marquee-text').innerText = listTeks.join('   •   ');
+        });
+
+        // 3. SINKRONISASI PLAYLIST VIDEO
+        database.ref('antrean/videos').on('value', (snapshot) => {
+            currentVideos = [];
+            if (snapshot.exists()) currentVideos = Object.values(snapshot.val());
+            if (currentVideos.length === 0) currentVideos.push('dQw4w9WgXcQ'); 
+            
+            updateVideoSrc();
+        });
+
+        function updateVideoSrc() {
+            const videoUtama = currentVideos[0];
+            const stringPlaylist = currentVideos.join(',');
+
+            urlPlaylistNormal = `https://www.youtube.com/embed/${videoUtama}?autoplay=1&mute=0&loop=1&playlist=${stringPlaylist}&controls=0&rel=0`;
+            
+            if (!isPlayingNationalAnthem && document.getElementById('audio-unlocker').classList.contains('pointer-events-none')) {
+                document.getElementById('youtube-player').src = urlPlaylistNormal;
+            }
+        }
+
+        // PENGATUR JAM & SCHEDULER JAM 10 PAGI
+        setInterval(() => {
+            const sekarang = new Date();
+            const waktuWIB = sekarang.toLocaleTimeString('id-ID', { timeZone: 'Asia/Jakarta', hour12: false });
+            document.getElementById('jam').innerText = waktuWIB;
+
+            if (waktuWIB === "10:00:00" && !isPlayingNationalAnthem) {
+                jalankanIndonesiaRaya();
+            }
+        }, 1000);
+
+        function jalankanIndonesiaRaya() {
+            isPlayingNationalAnthem = true;
+            const player = document.getElementById('youtube-player');
+            player.src = `https://www.youtube.com/embed/${idIndonesiaRaya}?autoplay=1&mute=0&controls=0&rel=0`;
+
+            setTimeout(() => {
+                isPlayingNationalAnthem = false;
+                player.src = urlPlaylistNormal; 
+            }, durasiLaguMilidetik);
+        }
+
+        // SUARA PANGGILAN ANTRIAN
+        database.ref('panggilanTerakhir').on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data && data.timestamp > window.loadedTime) {
+                suaraPanggilan(data.nomorEjaan, data.tujuan);
+            }
+        });
+
+        function suaraPanggilan(nomor, tujuan) {
+            try {
+                window.speechSynthesis.cancel(); 
+                const teks = `Nomor antrean, ${nomor}, silahkan menuju ke, ${tujuan}`;
+                const utterance = new SpeechSynthesisUtterance(teks);
+                utterance.lang = 'id-ID';
+                utterance.rate = 0.85;
+                window.speechSynthesis.speak(utterance);
+            } catch(e){}
+        }
+    </script>
+</body>
+</html>
