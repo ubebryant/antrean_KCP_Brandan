@@ -57,11 +57,11 @@
                 <h3 class="font-black text-gray-700 mb-4">⚙️ CONTROL CENTER</h3>
                 
                 <label class="block text-sm font-bold text-gray-500 mb-1">ID Video YouTube (11 Karakter)</label>
-                <input id="input-url-youtube" type="text" class="w-full p-4 bg-gray-50 border rounded-xl mb-4 text-sm" placeholder="Contoh: dQw4w9WgXcQ">
+                <input id="input-url-youtube" type="text" class="w-full p-4 bg-gray-50 border rounded-xl mb-4 text-sm font-semibold text-gray-700" placeholder="Memuat data video...">
                 <button onclick="updateVideo()" class="w-full bg-gray-800 text-white font-bold py-3 rounded-xl mb-6 cursor-pointer text-sm">UPDATE VIDEO</button>
 
                 <label class="block text-sm font-bold text-gray-500 mb-1">Teks Pengumuman Berjalan</label>
-                <textarea id="input-pengumuman" class="w-full p-4 bg-gray-50 border rounded-xl mb-4 text-sm" rows="3" placeholder="Ketik pengumuman baru..."></textarea>
+                <textarea id="input-pengumuman" class="w-full p-4 bg-gray-50 border rounded-xl mb-4 text-sm font-semibold text-gray-700" rows="3" placeholder="Memuat data pengumuman..."></textarea>
                 <button onclick="updatePengumuman()" class="w-full bg-gray-800 text-white font-bold py-3 rounded-xl cursor-pointer text-sm">UPDATE PENGUMUMAN</button>
             </div>
             
@@ -88,13 +88,29 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         let currentData = { cs: 0, teller: 0, videoId: 'dQw4w9WgXcQ', pengumuman: '' };
+        let isFirstLoad = true; // Penanda untuk pengisian otomatis awal saja
 
+        // Sinkronisasi data live display admin dari server internet
         database.ref('antrean').on('value', (snapshot) => {
             if(snapshot.exists()) currentData = snapshot.val();
+            
+            // 1. Update angka live monitor di atas panel
             document.getElementById('live-cs').innerText = 'CS-' + String(currentData.cs || 0).padStart(3, '0');
             document.getElementById('live-teller').innerText = 'TL-' + String(currentData.teller || 0).padStart(3, '0');
+            
+            // 2. PERBAIKAN: Menampilkan ID Video dan Pengumuman aktif langsung ke dalam textbox saat halaman dibuka
+            if (isFirstLoad) {
+                if (currentData.videoId) {
+                    document.getElementById('input-url-youtube').value = currentData.videoId;
+                }
+                if (currentData.pengumuman) {
+                    document.getElementById('input-pengumuman').value = currentData.pengumuman;
+                }
+                isFirstLoad = false; // Matikan penanda setelah pemuatan pertama agar tidak mengganggu ketikan petugas
+            }
         });
 
+        // Trigger Panggilan Nomor Baru
         function panggil(tipe) {
             if (tipe === 'cs') currentData.cs = (currentData.cs || 0) + 1;
             else currentData.teller = (currentData.teller || 0) + 1;
@@ -109,6 +125,7 @@
             });
         }
 
+        // Trigger Panggil Ulang Nomor
         function ulang(tipe) {
             let nomor = tipe === 'cs' ? currentData.cs : currentData.teller;
             if(nomor > 0) {
@@ -120,29 +137,37 @@
             }
         }
 
+        // Update ID Video YouTube Online
         function updateVideo() {
             let val = document.getElementById('input-url-youtube').value.trim();
             if(val) { 
                 currentData.videoId = val; 
                 database.ref('antrean').set(currentData); 
-                document.getElementById('input-url-youtube').value = "";
                 alert('Video Cloud berhasil diperbarui!'); 
+            } else {
+                alert('Kolom ID Video tidak boleh kosong!');
             }
         }
 
+        // Update Teks Berjalan Online
         function updatePengumuman() {
             let val = document.getElementById('input-pengumuman').value.trim();
             if(val) { 
                 currentData.pengumuman = val; 
                 database.ref('antrean').set(currentData); 
-                document.getElementById('input-pengumuman').value = "";
                 alert('Pengumuman Cloud berhasil diperbarui!'); 
+            } else {
+                alert('Kolom Teks Pengumuman tidak boleh kosong!');
             }
         }
 
+        // Reset Antrean Global
         function konfirmasiReset() {
             if(confirm("Reset nomor antrean di seluruh internet untuk hari ini?")) {
                 database.ref('antrean').set({ cs: 0, teller: 0, videoId: 'dQw4w9WgXcQ', pengumuman: 'Selamat Datang di PT. Bank SUMUT. Kepercayaan Anda adalah Prioritas Kami.' });
+                // Reset juga tampilan kolom teks ke pengaturan bawaan
+                document.getElementById('input-url-youtube').value = "dQw4w9WgXcQ";
+                document.getElementById('input-pengumuman').value = "Selamat Datang di PT. Bank SUMUT. Kepercayaan Anda adalah Prioritas Kami.";
                 alert('Sistem berhasil dikosongkan!');
             }
         }
