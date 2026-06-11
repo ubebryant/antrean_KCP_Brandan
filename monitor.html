@@ -96,9 +96,11 @@
 
         const idIndonesiaRaya = "eZgZ9eeS6Hk"; 
         const durasiLaguMilidetik = 150000;
+
+        // ATUR TINGKAT SEBERAPA KERAS VOLUME VIDEO YOUTUBE DI SINI (0 sampai 100)
         const SETTING_VOLUME_VIDEO = 20; 
 
-        // Inisialisasi YouTube Player
+        // Inisialisasi YouTube Player saat API siap
         function onYouTubeIframeAPIReady() {
             ytPlayer = new YT.Player('player', {
                 height: '100%',
@@ -120,6 +122,7 @@
         }
 
         function onPlayerReady(event) {
+            // Pasang volume pelan otomatis saat player siap
             event.target.setVolume(SETTING_VOLUME_VIDEO);
             if (isUnlocked && !isPlayingNationalAnthem) {
                 event.target.playVideo();
@@ -140,7 +143,7 @@
             }
         }
 
-        // 1. SINKRONISASI ANGKA ANTRIAN
+        // 1. SINKRONISASI ANGKA ANTRIAN SAJA
         database.ref('antrean/cs').on('value', (snapshot) => {
             const val = snapshot.val() || 0;
             document.getElementById('display-cs').innerText = 'CS-' + String(val).padStart(3, '0');
@@ -169,6 +172,7 @@
             if (currentVideos.length === 0) currentVideos.push('dQw4w9WgXcQ'); 
             
             if (ytPlayer && typeof ytPlayer.cuePlaylist === 'function' && !isPlayingNationalAnthem) {
+                // Perbarui playlist di dalam mesin YouTube tanpa me-refresh paksa player
                 const currentVideoId = ytPlayer.getVideoData()['video_id'];
                 if (currentVideoId !== currentVideos[0]) {
                     ytPlayer.loadPlaylist(currentVideos, 0, 0);
@@ -177,7 +181,7 @@
             }
         });
 
-        // PENGATUR JAM & SCHEDULER INDONESIA RAYA
+        // PENGATUR JAM & SCHEDULER JAM 10 PAGI
         setInterval(() => {
             const sekarang = new Date();
             const waktuWIB = sekarang.toLocaleTimeString('id-ID', { timeZone: 'Asia/Jakarta', hour12: false });
@@ -190,18 +194,21 @@
 
         function jalankanIndonesiaRaya() {
             if (!ytPlayer || typeof ytPlayer.loadVideoById !== 'function') return;
+            
             isPlayingNationalAnthem = true;
+            // Saat lagu kebangsaan diputar, besarkan volume ke 100% penuh otomatis
             ytPlayer.setVolume(100);
             ytPlayer.loadVideoById(idIndonesiaRaya);
 
             setTimeout(() => {
                 isPlayingNationalAnthem = false;
+                // Kembalikan ke volume musik latar pelan (20%) setelah lagu selesai
                 ytPlayer.setVolume(SETTING_VOLUME_VIDEO);
                 ytPlayer.loadPlaylist(currentVideos, 0, 0);
             }, durasiLaguMilidetik);
         }
 
-        // SUARA PANGGILAN ANTRIAN DENGAN PERBAIKAN STABILITAS CHROME
+        // SUARA PANGGILAN ANTRIAN (Diatur volume penuh 100%)
         database.ref('panggilanTerakhir').on('value', (snapshot) => {
             const data = snapshot.val();
             if (data && data.timestamp > window.loadedTime) {
@@ -212,40 +219,13 @@
         function suaraPanggilan(nomor, tujuan) {
             try {
                 window.speechSynthesis.cancel(); 
-                
                 const teks = `Nomor antrean, ${nomor}, silahkan menuju ke, ${tujuan}`;
-                
-                // Perbaikan utama: Mengunci ke window global agar tidak dihapus memori browser saat bersuara
-                window.currentUtterance = new SpeechSynthesisUtterance(teks);
-                window.currentUtterance.lang = 'id-ID';
-                window.currentUtterance.rate = 0.85;
-                window.currentUtterance.volume = 1.0; 
-
-                // Event ketika panggilan dimulai
-                window.currentUtterance.onstart = function() {
-                    if (ytPlayer && typeof ytPlayer.pauseVideo === 'function' && !isPlayingNationalAnthem) {
-                        ytPlayer.pauseVideo();
-                    }
-                };
-
-                // Event ketika panggilan selesai berbicara
-                window.currentUtterance.onend = function() {
-                    if (ytPlayer && typeof ytPlayer.playVideo === 'function' && !isPlayingNationalAnthem) {
-                        ytPlayer.playVideo();
-                    }
-                };
-
-                // Event tambahan penanganan kegagalan/interupsi suara
-                window.currentUtterance.onerror = function() {
-                    if (ytPlayer && typeof ytPlayer.playVideo === 'function' && !isPlayingNationalAnthem) {
-                        ytPlayer.playVideo();
-                    }
-                };
-
-                window.speechSynthesis.speak(window.currentUtterance);
-            } catch(e){
-                console.error("Kesalahan SpeechSynthesis:", e);
-            }
+                const utterance = new SpeechSynthesisUtterance(teks);
+                utterance.lang = 'id-ID';
+                utterance.rate = 0.85;
+                utterance.volume = 1.0; // PENGATURAN VOLUME SUARA GOOGLE ANTRIAN (1.0 artinya Maksimal/100%)
+                window.speechSynthesis.speak(utterance);
+            } catch(e){}
         }
     </script>
 </body>
