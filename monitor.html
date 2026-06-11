@@ -201,7 +201,7 @@
             }, durasiLaguMilidetik);
         }
 
-        // SUARA PANGGILAN ANTRIAN DENGAN FITUR AUTO PAUSE & AUTO PLAY
+        // SUARA PANGGILAN ANTRIAN DENGAN PERBAIKAN STABILITAS CHROME
         database.ref('panggilanTerakhir').on('value', (snapshot) => {
             const data = snapshot.val();
             if (data && data.timestamp > window.loadedTime) {
@@ -214,29 +214,38 @@
                 window.speechSynthesis.cancel(); 
                 
                 const teks = `Nomor antrean, ${nomor}, silahkan menuju ke, ${tujuan}`;
-                const utterance = new SpeechSynthesisUtterance(teks);
-                utterance.lang = 'id-ID';
-                utterance.rate = 0.85;
-                utterance.volume = 1.0; 
+                
+                // Perbaikan utama: Mengunci ke window global agar tidak dihapus memori browser saat bersuara
+                window.currentUtterance = new SpeechSynthesisUtterance(teks);
+                window.currentUtterance.lang = 'id-ID';
+                window.currentUtterance.rate = 0.85;
+                window.currentUtterance.volume = 1.0; 
 
-                // Aksi ketika Google TTS mulai berbicara
-                utterance.onstart = function() {
-                    // Hanya pause video jika tidak sedang memutar Lagu Indonesia Raya
+                // Event ketika panggilan dimulai
+                window.currentUtterance.onstart = function() {
                     if (ytPlayer && typeof ytPlayer.pauseVideo === 'function' && !isPlayingNationalAnthem) {
                         ytPlayer.pauseVideo();
                     }
                 };
 
-                // Aksi ketika Google TTS selesai berbicara
-                utterance.onend = function() {
-                    // Putar kembali video jika tidak sedang memutar Lagu Indonesia Raya
+                // Event ketika panggilan selesai berbicara
+                window.currentUtterance.onend = function() {
                     if (ytPlayer && typeof ytPlayer.playVideo === 'function' && !isPlayingNationalAnthem) {
                         ytPlayer.playVideo();
                     }
                 };
 
-                window.speechSynthesis.speak(utterance);
-            } catch(e){}
+                // Event tambahan penanganan kegagalan/interupsi suara
+                window.currentUtterance.onerror = function() {
+                    if (ytPlayer && typeof ytPlayer.playVideo === 'function' && !isPlayingNationalAnthem) {
+                        ytPlayer.playVideo();
+                    }
+                };
+
+                window.speechSynthesis.speak(window.currentUtterance);
+            } catch(e){
+                console.error("Kesalahan SpeechSynthesis:", e);
+            }
         }
     </script>
 </body>
