@@ -56,23 +56,30 @@
             <div class="bg-white p-6 rounded-3xl shadow-lg">
                 <h3 class="font-black text-gray-700 mb-4">⚙️ CONTROL CENTER</h3>
                 
-                <label class="block text-sm font-bold text-gray-500 mb-1">Tambah ID Video YouTube Baru (11 Karakter)</label>
-                <div class="flex gap-2 mb-4">
-                    <input id="input-url-youtube" type="text" class="flex-grow p-4 bg-gray-50 border rounded-xl text-sm font-semibold text-gray-700" placeholder="Contoh: dQw4w9WgXcQ">
-                    <button onclick="tambahVideo()" class="bg-blue-900 text-white font-bold px-6 rounded-xl hover:bg-blue-950 cursor-pointer text-sm">TAMBAH</button>
+                <label class="block text-sm font-bold text-gray-500 mb-1">Tambah ID Video YouTube Baru</label>
+                <div class="flex gap-2 mb-3">
+                    <input id="input-url-youtube" type="text" class="flex-grow p-3 bg-gray-50 border rounded-xl text-sm font-semibold text-gray-700" placeholder="Contoh: dQw4w9WgXcQ">
+                    <button onclick="tambahVideo()" class="bg-blue-900 text-white font-bold px-4 rounded-xl hover:bg-blue-950 cursor-pointer text-xs">TAMBAH</button>
+                </div>
+                <label class="block text-[11px] font-bold text-gray-400 mb-1">Daftar Video Aktif di TV:</label>
+                <div id="list-playlist-video" class="space-y-2 max-h-[110px] overflow-y-auto border p-2 rounded-xl bg-gray-50 mb-6 text-xs text-gray-600">
+                    <p class="text-gray-400 italic">Memuat video cloud...</p>
                 </div>
 
-                <label class="block text-sm font-bold text-gray-500 mb-1">Daftar Putar Video Aktif di TV:</label>
-                <div id="list-playlist-video" class="space-y-2 max-h-[150px] overflow-y-auto border p-2 rounded-xl bg-gray-50 mb-6 text-xs text-gray-600">
-                    <p class="text-gray-400 italic">Memuat daftar video cloud...</p>
-                </div>
+                <hr class="my-4 border-gray-200">
 
-                <label class="block text-sm font-bold text-gray-500 mb-1">Teks Pengumuman Berjalan</label>
-                <textarea id="input-pengumuman" class="w-full p-4 bg-gray-50 border rounded-xl mb-4 text-sm font-semibold text-gray-700" rows="3" placeholder="Memuat data pengumuman..."></textarea>
-                <button onclick="updatePengumuman()" class="w-full bg-gray-800 text-white font-bold py-3 rounded-xl cursor-pointer text-sm">UPDATE PENGUMUMAN</button>
+                <label class="block text-sm font-bold text-gray-500 mb-1">Tambah Teks Informasi Baru</label>
+                <div class="flex gap-2 mb-3">
+                    <input id="input-pengumuman" type="text" class="flex-grow p-3 bg-gray-50 border rounded-xl text-sm font-semibold text-gray-700" placeholder="Ketik kalimat informasi di sini...">
+                    <button onclick="tambahPengumuman()" class="bg-emerald-600 text-white font-bold px-4 rounded-xl hover:bg-emerald-700 cursor-pointer text-xs">TAMBAH</button>
+                </div>
+                <label class="block text-[11px] font-bold text-gray-400 mb-1">Daftar Informasi Berjalan Saat Ini:</label>
+                <div id="list-playlist-teks" class="space-y-2 max-h-[110px] overflow-y-auto border p-2 rounded-xl bg-gray-50 mb-4 text-xs text-gray-600">
+                    <p class="text-gray-400 italic">Memuat teks cloud...</p>
+                </div>
             </div>
             
-            <button onclick="konfirmasiReset()" class="w-full bg-red-100 text-red-600 font-bold py-4 rounded-2xl border-2 border-red-300 hover:bg-red-600 hover:text-white transition cursor-pointer text-sm">RESET KE 0 & KOSONGKAN VIDEO</button>
+            <button onclick="konfirmasiResetHarian()" class="w-full bg-orange-50 text-orange-700 font-bold py-4 rounded-2xl border-2 border-orange-300 hover:bg-orange-600 hover:text-white transition cursor-pointer text-sm shadow-sm">RESET NOMOR ANTRIAN KE 0 (Video & Teks Tetap Aman)</button>
         </div>
     </main>
 
@@ -93,76 +100,79 @@
 
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
-        let currentData = { cs: 0, teller: 0, videos: {}, pengumuman: '' };
+        let currentData = { cs: 0, teller: 0, videos: {}, pengumumanMulti: {} };
 
-        // Sinkronisasi data real-time dari server Firebase Cloud
+        // Sinkronisasi data real-time cloud ke panel petugas
         database.ref('antrean').on('value', (snapshot) => {
             if(snapshot.exists()) currentData = snapshot.val();
             
-            // 1. Render angka Monitor
             document.getElementById('live-cs').innerText = 'CS-' + String(currentData.cs || 0).padStart(3, '0');
             document.getElementById('live-teller').innerText = 'TL-' + String(currentData.teller || 0).padStart(3, '0');
             
-            // 2. Render Teks Pengumuman
-            if (currentData.pengumuman) {
-                document.getElementById('input-pengumuman').value = currentData.pengumuman;
-            }
-
-            // 3. Render Daftar Video Aktif secara Dinamis ke HTML Panel
+            // Render Daftar Video
             const boxPlaylist = document.getElementById('list-playlist-video');
             boxPlaylist.innerHTML = "";
-
             if (currentData.videos) {
                 Object.entries(currentData.videos).forEach(([key, idVideo]) => {
                     boxPlaylist.innerHTML += `
                         <div class="flex justify-between items-center bg-white p-2 border rounded-lg shadow-sm">
                             <span class="font-mono font-bold text-gray-700">${idVideo}</span>
-                            <button onclick="hapusVideo('${key}')" class="text-red-500 font-extrabold hover:text-red-700 px-2 cursor-pointer">✕ Hapus</button>
-                        </div>
-                    `;
+                            <button onclick="hapusVideo('${key}')" class="text-red-500 font-bold hover:text-red-700 px-1 cursor-pointer">✕ Hapus</button>
+                        </div>`;
                 });
             } else {
-                boxPlaylist.innerHTML = `<p class="text-gray-400 italic p-1">Tidak ada video. TV memutar video default.</p>`;
+                boxPlaylist.innerHTML = `<p class="text-gray-400 italic p-1">Tidak ada video khusus. TV memutar video bawaan.</p>`;
+            }
+
+            // Render Daftar Pengumuman Multi-Informasi
+            const boxTeks = document.getElementById('list-playlist-teks');
+            boxTeks.innerHTML = "";
+            if (currentData.pengumumanMulti) {
+                Object.entries(currentData.pengumumanMulti).forEach(([key, teksInfo]) => {
+                    boxTeks.innerHTML += `
+                        <div class="flex justify-between items-center bg-white p-2 border rounded-lg shadow-sm">
+                            <span class="truncate pr-4 text-gray-700 font-medium">${teksInfo}</span>
+                            <button onclick="hapusPengumuman('${key}')" class="text-red-500 font-bold hover:text-red-700 px-1 shrink-0 cursor-pointer">✕ Hapus</button>
+                        </div>`;
+                });
+            } else {
+                boxTeks.innerHTML = `<p class="text-gray-400 italic p-1">Tidak ada informasi khusus. TV memutar teks bawaan.</p>`;
             }
         });
 
-        // FUNGSI DINAMIS: Tambah Video ke Database Cloud
+        // Tambah Video Baru
         function tambahVideo() {
             const input = document.getElementById('input-url-youtube');
             const idVideo = input.value.trim();
-
             if (idVideo.length === 11) {
-                // Dorong data baru ke dalam child 'videos'
-                database.ref('antrean/videos').push(idVideo)
-                .then(() => {
+                database.ref('antrean/videos').push(idVideo).then(() => {
                     input.value = "";
-                    alert("Video sukses ditambahkan ke playlist TV!");
                 });
-            } else {
-                alert("ID Video YouTube wajib berjumlah 11 karakter unik!");
-            }
+            } else { alert("ID Video harus 11 karakter!"); }
         }
 
-        // FUNGSI DINAMIS: Hapus Video tertentu berdasarkan Key Firebase-nya
-        function hapusVideo(firebaseKey) {
-            if(confirm("Hapus video ini dari playlist TV?")) {
-                database.ref(`antrean/videos/${firebaseKey}`).remove()
-                .then(() => {
-                    alert("Video berhasil dihapus!");
+        // Hapus Video
+        function hapusVideo(key) {
+            if(confirm("Hapus video ini?")) { database.ref(`antrean/videos/${key}`).remove(); }
+        }
+
+        // Tambah Informasi Pengumuman Baru
+        function tambahPengumuman() {
+            const input = document.getElementById('input-pengumuman');
+            const teksInfo = input.value.trim();
+            if (teksInfo) {
+                database.ref('antrean/pengumumanMulti').push(teksInfo).then(() => {
+                    input.value = "";
                 });
-            }
+            } else { alert("Teks pengumuman tidak boleh kosong!"); }
         }
 
-        // Update Teks Berjalan Online
-        function updatePengumuman() {
-            let val = document.getElementById('input-pengumuman').value.trim();
-            if(val) { 
-                database.ref('antrean/pengumuman').set(val); 
-                alert('Pengumuman Cloud berhasil diperbarui!'); 
-            }
+        // Hapus Informasi Pengumuman
+        function hapusPengumuman(key) {
+            if(confirm("Hapus teks informasi ini dari TV?")) { database.ref(`antrean/pengumumanMulti/${key}`).remove(); }
         }
 
-        // Trigger Panggilan Nomor Baru
+        // Panggil Nomor Baru
         function panggil(tipe) {
             if (tipe === 'cs') currentData.cs = (currentData.cs || 0) + 1;
             else currentData.teller = (currentData.teller || 0) + 1;
@@ -178,7 +188,7 @@
             });
         }
 
-        // Trigger Panggil Ulang Nomor
+        // Panggil Ulang
         function ulang(tipe) {
             let nomor = tipe === 'cs' ? currentData.cs : currentData.teller;
             if(nomor > 0) {
@@ -190,15 +200,12 @@
             }
         }
 
-        // Reset Antrean Global
-        function konfirmasiReset() {
-            if(confirm("Reset nomor antrean dan kosongkan playlist video hari ini?")) {
-                database.ref('antrean').set({ 
-                    cs: 0, 
-                    teller: 0, 
-                    pengumuman: 'Selamat Datang di PT. Bank SUMUT. Kepercayaan Anda adalah Prioritas Kami.' 
-                });
-                alert('Sistem berhasil dikosongkan!');
+        // Reset Harian yang Aman (Hanya mengembalikan antrean ke 0)
+        function konfirmasiResetHarian() {
+            if(confirm("Kembalikan nomor antrean ke 0 untuk pagi ini? (Daftar video & teks pengumuman Anda tetap aman disimpan)")) {
+                database.ref('antrean/cs').set(0);
+                database.ref('antrean/teller').set(0);
+                alert('Nomor antrean berhasil di-reset ke 0!');
             }
         }
     </script>
