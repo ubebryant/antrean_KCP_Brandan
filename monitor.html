@@ -84,6 +84,14 @@
         const database = firebase.database();
         window.loadedTime = Date.now();
 
+        // Variabel Penyimpanan Lokal State Video
+        let urlPlaylistNormal = ""; 
+        let isPlayingNationalAnthem = false;
+
+        // ID Video Indonesia Raya Resmi (Bisa Anda ganti kode YouTube-nya jika punya versi lain)
+        const idIndonesiaRaya = "eZgZ9eeS6Hk"; 
+        const durasiLaguMilidetik = 150000; // 150.000 ms = 2 Menit 30 Detik
+
         // Sinkronisasi data real-time display TV
         database.ref('antrean').on('value', (snapshot) => {
             const data = snapshot.val() || {};
@@ -91,37 +99,59 @@
             document.getElementById('display-cs').innerText = 'CS-' + String(data.cs || 0).padStart(3, '0');
             document.getElementById('display-teller').innerText = 'TL-' + String(data.teller || 0).padStart(3, '0');
 
-            // SISTEM DINAMIS MULTI-INFORMASI TEKS BERJALAN
+            // Render Multi-Informasi Teks Berjalan
             let listTeks = [];
-            if (data.pengumumanMulti) {
-                listTeks = Object.values(data.pengumumanMulti);
-            }
-            
-            // Jika kosong di database, tampilkan teks bawaan standar
+            if (data.pengumumanMulti) listTeks = Object.values(data.pengumumanMulti);
             if (listTeks.length === 0) {
                 listTeks.push('Selamat Datang di PT. Bank SUMUT KCP Pangkalan Brandan.');
                 listTeks.push('Kepercayaan Anda adalah Prioritas Kami.');
             }
-            // Gabungkan teks dengan pemisah estetik lingkaran spasi
             document.getElementById('marquee-text').innerText = listTeks.join('   •   ');
 
-            // SISTEM DINAMIS PLAYLIST YOUTUBE MULTI-LINK
-            const player = document.getElementById('youtube-player');
+            // Ambil Playlist Dinamis
             let listVideo = [];
-            if (data.videos) {
-                listVideo = Object.values(data.videos);
-            }
-            if (listVideo.length === 0) {
-                listVideo.push('dQw4w9WgXcQ'); 
-            }
+            if (data.videos) listVideo = Object.values(data.videos);
+            if (listVideo.length === 0) listVideo.push('dQw4w9WgXcQ'); 
+            
             const videoUtama = listVideo[0];
             const stringPlaylist = listVideo.join(',');
 
-            const generatedSrc = `https://www.youtube.com/embed/${videoUtama}?autoplay=1&mute=1&loop=1&playlist=${stringPlaylist}&controls=0&rel=0`;
-            if (player.src !== generatedSrc) {
-                player.src = generatedSrc;
+            // Kunci URL Video Normal ke Memori
+            urlPlaylistNormal = `https://www.youtube.com/embed/${videoUtama}?autoplay=1&mute=1&loop=1&playlist=${stringPlaylist}&controls=0&rel=0`;
+            
+            // Jalankan video normal HANYA jika sedang tidak memutar Indonesia Raya
+            if (!isPlayingNationalAnthem) {
+                document.getElementById('youtube-player').src = urlPlaylistNormal;
             }
         });
+
+        // Pengatur Jam & Scheduler Otomatis Jam 10 Pagi
+        setInterval(() => {
+            const sekarang = new Date();
+            
+            // Konversi paksa zona waktu komputer TV agar mengikuti WIB (Waktu Indonesia Barat)
+            const waktuWIB = sekarang.toLocaleTimeString('id-ID', { timeZone: 'Asia/Jakarta', hour12: false });
+            document.getElementById('jam').innerText = waktuWIB;
+
+            // SISTEM DETEKSI JAM 10.00.00 WIB TEPAT
+            if (waktuWIB === "10:00:00" && !isPlayingNationalAnthem) {
+                jalankanIndonesiaRaya();
+            }
+        }, 1000);
+
+        function jalankanIndonesiaRaya() {
+            isPlayingNationalAnthem = true;
+            const player = document.getElementById('youtube-player');
+            
+            // Ganti video ke Indonesia Raya (Mute=0 agar bersuara lantang ke ruang tunggu)
+            player.src = `https://www.youtube.com/embed/${idIndonesiaRaya}?autoplay=1&mute=0&controls=0&rel=0`;
+
+            // Ketika durasi lagu habis, kembalikan otomatis ke video iklan bank semula
+            setTimeout(() => {
+                isPlayingNationalAnthem = false;
+                player.src = urlPlaylistNormal; // Kembali ke playlist promosi bank
+            }, durasiLaguMilidetik);
+        }
 
         // Suara Panggilan Masuk
         database.ref('panggilanTerakhir').on('value', (snapshot) => {
@@ -141,10 +171,6 @@
                 window.speechSynthesis.speak(utterance);
             } catch(e){}
         }
-
-        setInterval(() => {
-            document.getElementById('jam').innerText = new Date().toLocaleTimeString('id-ID', { hour12: false });
-        }, 1000);
     </script>
 </body>
 </html>

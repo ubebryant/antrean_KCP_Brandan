@@ -102,14 +102,12 @@
         const database = firebase.database();
         let currentData = { cs: 0, teller: 0, videos: {}, pengumumanMulti: {} };
 
-        // Sinkronisasi data real-time cloud ke panel petugas
         database.ref('antrean').on('value', (snapshot) => {
             if(snapshot.exists()) currentData = snapshot.val();
             
             document.getElementById('live-cs').innerText = 'CS-' + String(currentData.cs || 0).padStart(3, '0');
             document.getElementById('live-teller').innerText = 'TL-' + String(currentData.teller || 0).padStart(3, '0');
             
-            // Render Daftar Video
             const boxPlaylist = document.getElementById('list-playlist-video');
             boxPlaylist.innerHTML = "";
             if (currentData.videos) {
@@ -124,7 +122,6 @@
                 boxPlaylist.innerHTML = `<p class="text-gray-400 italic p-1">Tidak ada video khusus. TV memutar video bawaan.</p>`;
             }
 
-            // Render Daftar Pengumuman Multi-Informasi
             const boxTeks = document.getElementById('list-playlist-teks');
             boxTeks.innerHTML = "";
             if (currentData.pengumumanMulti) {
@@ -140,39 +137,30 @@
             }
         });
 
-        // Tambah Video Baru
         function tambahVideo() {
             const input = document.getElementById('input-url-youtube');
             const idVideo = input.value.trim();
             if (idVideo.length === 11) {
-                database.ref('antrean/videos').push(idVideo).then(() => {
-                    input.value = "";
-                });
+                database.ref('antrean/videos').push(idVideo).then(() => { input.value = ""; });
             } else { alert("ID Video harus 11 karakter!"); }
         }
 
-        // Hapus Video
         function hapusVideo(key) {
             if(confirm("Hapus video ini?")) { database.ref(`antrean/videos/${key}`).remove(); }
         }
 
-        // Tambah Informasi Pengumuman Baru
         function tambahPengumuman() {
             const input = document.getElementById('input-pengumuman');
             const teksInfo = input.value.trim();
             if (teksInfo) {
-                database.ref('antrean/pengumumanMulti').push(teksInfo).then(() => {
-                    input.value = "";
-                });
+                database.ref('antrean/pengumumanMulti').push(teksInfo).then(() => { input.value = ""; });
             } else { alert("Teks pengumuman tidak boleh kosong!"); }
         }
 
-        // Hapus Informasi Pengumuman
         function hapusPengumuman(key) {
             if(confirm("Hapus teks informasi ini dari TV?")) { database.ref(`antrean/pengumumanMulti/${key}`).remove(); }
         }
 
-        // Panggil Nomor Baru
         function panggil(tipe) {
             if (tipe === 'cs') currentData.cs = (currentData.cs || 0) + 1;
             else currentData.teller = (currentData.teller || 0) + 1;
@@ -188,7 +176,6 @@
             });
         }
 
-        // Panggil Ulang
         function ulang(tipe) {
             let nomor = tipe === 'cs' ? currentData.cs : currentData.teller;
             if(nomor > 0) {
@@ -200,7 +187,6 @@
             }
         }
 
-        // Reset Harian yang Aman (Hanya mengembalikan antrean ke 0)
         function konfirmasiResetHarian() {
             if(confirm("Kembalikan nomor antrean ke 0 untuk pagi ini? (Daftar video & teks pengumuman Anda tetap aman disimpan)")) {
                 database.ref('antrean/cs').set(0);
