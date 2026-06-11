@@ -119,19 +119,17 @@
             document.getElementById('live-cs').innerText = 'CS-' + String(currentData.cs || 0).padStart(3, '0');
             document.getElementById('live-teller').innerText = 'TL-' + String(currentData.teller || 0).padStart(3, '0');
             
-            // Render Daftar Video dengan Penanda LIVE PLAYING
+            // Render Daftar Video
             const boxPlaylist = document.getElementById('list-playlist-video');
             boxPlaylist.innerHTML = "";
             if (Object.keys(rawVideoObjects).length > 0) {
                 let indexCounter = 0;
                 Object.entries(rawVideoObjects).forEach(([key, idVideo]) => {
                     
-                    // Cek jika ini adalah video urutan teratas (yang sedang berjalan di TV)
                     const isLive = (indexCounter === 0);
-                    
                     const borderStyle = isLive ? 'border-emerald-500 bg-emerald-50/40' : 'border-gray-200 bg-white';
                     const badgeLive = isLive ? `<span class="ml-2 bg-emerald-600 text-white font-extrabold px-1.5 py-0.5 rounded text-[9px] uppercase tracking-wider animate-pulse flex items-center gap-1"><span class="w-1.5 h-1.5 bg-white rounded-full"></span>LIVE PLAYING</span>` : '';
-                    const playButtonHide = isLive ? 'invisible pointer-events-none' : ''; // Sembunyikan tombol play jika sedang live
+                    const playButtonHide = isLive ? 'invisible pointer-events-none' : '';
 
                     boxPlaylist.innerHTML += `
                         <div class="flex justify-between items-center p-2 border rounded-lg shadow-sm transition-all duration-300 ${borderStyle}">
@@ -151,7 +149,7 @@
                 boxPlaylist.innerHTML = `<p class="text-gray-400 italic p-1">Tidak ada video khusus. TV memutar video bawaan.</p>`;
             }
 
-            // Render Daftar Pengumuman Multi-Informasi
+            // Render Daftar Pengumuman
             const boxTeks = document.getElementById('list-playlist-teks');
             boxTeks.innerHTML = "";
             if (snapshot.val() && snapshot.val().pengumumanMulti) {
@@ -190,21 +188,30 @@
             if(confirm("Hapus video ini dari playlist?")) { database.ref(`antrean/videos/${key}`).remove(); }
         }
 
+        // ==========================================
+        // PERBAIKAN UTAMA: LOGIKA PUTAR VIDEO INSTAN
+        // ==========================================
         function putarVideoInstan(targetKey) {
             const idVideoTarget = rawVideoObjects[targetKey];
             if(!idVideoTarget) return;
 
-            const daftarLengkap = Object.entries(rawVideoObjects);
+            // 1. Buat objek penampung baru di memori lokal PC
+            let playlistBaru = {};
             
-            database.ref('antrean/videos').remove().then(() => {
-                database.ref('antrean/videos').push(idVideoTarget).then(() => {
-                    daftarLengkap.forEach(([key, idVideo]) => {
-                        if(key !== targetKey) {
-                            database.ref('antrean/videos').push(idVideo);
-                        }
-                    });
-                });
+            // 2. Buat ID acak unik (seperti cara kerja .push() Firebase) untuk video utama
+            const randomKeyUtama = 'key_' + Math.random().toString(36).substr(2, 9);
+            playlistBaru[randomKeyUtama] = idVideoTarget;
+            
+            // 3. Masukkan sisa video lainnya secara berurutan di bawahnya
+            Object.entries(rawVideoObjects).forEach(([key, idVideo]) => {
+                if(key !== targetKey) {
+                    const randomKeySisa = 'key_' + Math.random().toString(36).substr(2, 9);
+                    playlistBaru[randomKeySisa] = idVideo;
+                }
             });
+
+            // 4. Update data sekaligus menggunakan .set() agar struktur urutan terkunci sempurna
+            database.ref('antrean/videos').set(playlistBaru);
         }
 
         function nextVideo() {
@@ -213,12 +220,23 @@
                 alert("Minimal harus ada 2 video di dalam daftar untuk menggunakan fitur Next!");
                 return;
             }
+            
             const keyPertama = keys[0];
             const idVideoPertama = rawVideoObjects[keyPertama];
 
-            database.ref('antrean/videos').push(idVideoPertama).then(() => {
-                database.ref(`antrean/videos/${keyPertama}`).remove();
+            let playlistBaru = {};
+            
+            Object.entries(rawVideoObjects).forEach(([key, idVideo]) => {
+                if(key !== keyPertama) {
+                    const randomKey = 'key_' + Math.random().toString(36).substr(2, 9);
+                    playlistBaru[randomKey] = idVideo;
+                }
             });
+
+            const randomKeyTerakhir = 'key_' + Math.random().toString(36).substr(2, 9);
+            playlistBaru[randomKeyTerakhir] = idVideoPertama;
+
+            database.ref('antrean/videos').set(playlistBaru);
         }
 
         function tambahPengumuman() {
