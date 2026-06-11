@@ -59,9 +59,8 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
     <script>
-        // ⚠️ TEMPELKAN KONFIGURASI FIREBASE ANDA DI SINI
-        const firebaseConfig = {
-            apiKey: "AIzaSyCY3RjNKQULXZmU18gxx3uKS0PE3D4kpgk",
+        // ⚠️ TEMPELKAN KONFIGURASI FIREBASE YANG SAMA DI SINI
+        const firebaseConfig = {apiKey: "AIzaSyCY3RjNKQULXZmU18gxx3uKS0PE3D4kpgk",
             authDomain: "antreankcpbrandan.firebaseapp.com",
             databaseURL: "https://antreankcpbrandan-default-rtdb.asia-southeast1.firebasedatabase.app",
             projectId: "antreankcpbrandan",
@@ -71,20 +70,18 @@
             measurementId: "G-Y8WZMRR4N0"
         };
 
-        // Inisialisasi Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
+        window.loadedTime = Date.now(); // Penanda waktu aplikasi mulai aktif
 
-        // Dengarkan Perubahan Data Secara Real-time dari Internet
+        // Sinkronisasi data display nomor, video, dan pengumuman
         database.ref('antrean').on('value', (snapshot) => {
             const data = snapshot.val() || { cs: 0, teller: 0, videoId: 'dQw4w9WgXcQ', pengumuman: '' };
             
             document.getElementById('display-cs').innerText = 'CS-' + String(data.cs || 0).padStart(3, '0');
             document.getElementById('display-teller').innerText = 'TL-' + String(data.teller || 0).padStart(3, '0');
 
-            if (data.pengumuman) {
-                document.getElementById('marquee-text').innerText = data.pengumuman;
-            }
+            if (data.pengumuman) document.getElementById('marquee-text').innerText = data.pengumuman;
 
             const player = document.getElementById('youtube-player');
             const targetVideo = data.videoId || 'dQw4w9WgXcQ';
@@ -93,24 +90,27 @@
             }
         });
 
-        // Suara Panggilan Dipicu Saat Ada Perubahan Panggilan Baru
+        // Menangkap pemicu suara panggilan aktif
         database.ref('panggilanTerakhir').on('value', (snapshot) => {
             const data = snapshot.val();
-            if (data && data.timestamp > (window.loadedTime || 0)) {
+            // Hanya bersuara jika data ditekan setelah monitor ini menyala (menghindari suara beruntun saat refresh)
+            if (data && data.timestamp > window.loadedTime) {
                 suaraPanggilan(data.nomorEjaan, data.tujuan);
             }
         });
 
-        window.onload = () => { window.loadedTime = Date.now(); document.body.addEventListener('click', () => console.log('Audio Ready')); };
-
         function suaraPanggilan(nomor, tujuan) {
             try {
+                // Hentikan suara panggilan lama yang belum selesai bicara (antrean bertumpuk)
+                window.speechSynthesis.cancel();
+
                 const teks = `Nomor antrean, ${nomor}, silahkan menuju ke, ${tujuan}`;
                 const utterance = new SpeechSynthesisUtterance(teks);
                 utterance.lang = 'id-ID';
-                utterance.rate = 0.85;
+                utterance.rate = 0.85; // Kecepatan bicara normal
+                utterance.volume = 1;  // Volume maksimal
                 window.speechSynthesis.speak(utterance);
-            } catch(e){}
+            } catch(e){ console.log("Gagal memutar suara: ", e); }
         }
 
         setInterval(() => {

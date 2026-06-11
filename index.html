@@ -38,16 +38,16 @@
             <div class="bg-white p-6 rounded-3xl shadow-lg border-t-8 border-emerald-500">
                 <h3 class="text-emerald-700 font-black mb-4">CUSTOMER SERVICE (CS)</h3>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <button onclick="panggil('cs')" class="bg-emerald-600 text-white font-bold py-5 rounded-2xl shadow hover:bg-emerald-700 transition active:scale-95">PANGGIL BERIKUTNYA</button>
-                    <button onclick="ulang('cs')" class="bg-orange-500 text-white font-bold py-5 rounded-2xl shadow hover:bg-orange-600 transition active:scale-95">PANGGIL ULANG</button>
+                    <button onclick="panggil('cs')" class="bg-emerald-600 text-white font-bold py-5 rounded-2xl shadow hover:bg-emerald-700 transition active:scale-95 cursor-pointer">PANGGIL BERIKUTNYA</button>
+                    <button onclick="ulang('cs')" class="bg-orange-500 text-white font-bold py-5 rounded-2xl shadow hover:bg-orange-600 transition active:scale-95 cursor-pointer">PANGGIL ULANG</button>
                 </div>
             </div>
 
             <div class="bg-white p-6 rounded-3xl shadow-lg border-t-8 border-blue-900">
                 <h3 class="text-blue-900 font-black mb-4">TELLER LAYANAN</h3>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <button onclick="panggil('teller')" class="bg-blue-900 text-white font-bold py-5 rounded-2xl shadow hover:bg-blue-950 transition active:scale-95">PANGGIL BERIKUTNYA</button>
-                    <button onclick="ulang('teller')" class="bg-orange-500 text-white font-bold py-5 rounded-2xl shadow hover:bg-orange-600 transition active:scale-95">PANGGIL ULANG</button>
+                    <button onclick="panggil('teller')" class="bg-blue-900 text-white font-bold py-5 rounded-2xl shadow hover:bg-blue-950 transition active:scale-95 cursor-pointer">PANGGIL BERIKUTNYA</button>
+                    <button onclick="ulang('teller')" class="bg-orange-500 text-white font-bold py-5 rounded-2xl shadow hover:bg-orange-600 transition active:scale-95 cursor-pointer">PANGGIL ULANG</button>
                 </div>
             </div>
         </div>
@@ -57,13 +57,13 @@
                 <h3 class="font-black text-gray-700 mb-4">⚙️ CONTROL CENTER</h3>
                 <label class="block text-sm font-bold text-gray-500 mb-1">ID Video YouTube</label>
                 <input id="input-url-youtube" type="text" class="w-full p-4 bg-gray-50 border rounded-xl mb-4" placeholder="Contoh: dQw4w9WgXcQ">
-                <button onclick="updateVideo()" class="w-full bg-gray-800 text-white font-bold py-3 rounded-xl mb-6">UPDATE VIDEO</button>
+                <button onclick="updateVideo()" class="w-full bg-gray-800 text-white font-bold py-3 rounded-xl mb-6 cursor-pointer">UPDATE VIDEO</button>
 
                 <label class="block text-sm font-bold text-gray-500 mb-1">Teks Pengumuman</label>
                 <textarea id="input-pengumuman" class="w-full p-4 bg-gray-50 border rounded-xl mb-4" rows="3"></textarea>
-                <button onclick="updatePengumuman()" class="w-full bg-gray-800 text-white font-bold py-3 rounded-xl">UPDATE PENGUMUMAN</button>
+                <button onclick="updatePengumuman()" class="w-full bg-gray-800 text-white font-bold py-3 rounded-xl cursor-pointer">UPDATE PENGUMUMAN</button>
             </div>
-            <button onclick="konfirmasiReset()" class="w-full bg-red-100 text-red-600 font-bold py-4 rounded-2xl border-2 border-red-300">RESET KE 0</button>
+            <button onclick="konfirmasiReset()" class="w-full bg-red-100 text-red-600 font-bold py-4 rounded-2xl border-2 border-red-300 cursor-pointer">RESET KE 0</button>
         </div>
     </main>
 
@@ -71,7 +71,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
     <script>
-        // ⚠️ TEMPELKAN KONFIGURASI FIREBASE YANG SAMA DI SINI
+        // ⚠️ TEMPELKAN KONFIGURASI FIREBASE ANDA DI SINI
         const firebaseConfig = {
             apiKey: "AIzaSyCY3RjNKQULXZmU18gxx3uKS0PE3D4kpgk",
             authDomain: "antreankcpbrandan.firebaseapp.com",
@@ -87,7 +87,6 @@
         const database = firebase.database();
         let currentData = { cs: 0, teller: 0, videoId: 'dQw4w9WgXcQ', pengumuman: '' };
 
-        // Sinkronisasi status angka dari server cloud
         database.ref('antrean').on('value', (snapshot) => {
             if(snapshot.exists()) currentData = snapshot.val();
             document.getElementById('live-cs').innerText = 'CS-' + String(currentData.cs || 0).padStart(3, '0');
@@ -101,10 +100,12 @@
             database.ref('antrean').set(currentData);
             
             let nomor = tipe === 'cs' ? currentData.cs : currentData.teller;
+            
+            // PERBAIKAN UTAMA: Perubahan huruf kecil pada firebase.database
             database.ref('panggilanTerakhir').set({
                 nomorEjaan: (tipe === 'cs' ? 'C S ' : 'Teller ') + nomor,
                 tujuan: tipe === 'cs' ? 'Customer Service' : 'Teller',
-                timestamp: Firebase.database.ServerValue.TIMESTAMP
+                timestamp: firebase.database.ServerValue.TIMESTAMP
             });
         }
 
@@ -114,7 +115,7 @@
                 database.ref('panggilanTerakhir').set({
                     nomorEjaan: (tipe === 'cs' ? 'C S ' : 'Teller ') + nomor,
                     tujuan: tipe === 'cs' ? 'Customer Service' : 'Teller',
-                    timestamp: Firebase.database.ServerValue.TIMESTAMP
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
                 });
             }
         }
@@ -124,7 +125,6 @@
             if(val) { currentData.videoId = val; database.ref('antrean').set(currentData); alert('Video Cloud diupdate!'); }
         }
 
-        // Teks Pengumuman
         function updatePengumuman() {
             let val = document.getElementById('input-pengumuman').value.trim();
             if(val) { currentData.pengumuman = val; database.ref('antrean').set(currentData); alert('Pengumuman Cloud diupdate!'); }
