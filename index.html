@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Petugas - Bank SUMUT</title>
+    <title>Panel Petugas - Bank SUMUT Online</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
@@ -14,10 +14,10 @@
 
     <header class="bg-white p-4 shadow flex justify-between items-center border-b-2 border-orange-500">
         <div class="flex items-center gap-3">
-            <img src="Logo_Bank_Sumut.png" alt="Logo Bank SUMUT" class="h-10">
-            <h1 class="text-blue-900 font-black tracking-wide hidden sm:block">PANEL KONTROL ANTREAN</h1>
+            <img src="Logo_Bank_Sumut.png" alt="Logo" class="h-10">
+            <h1 class="text-blue-900 font-black tracking-wide">PANEL ONLINE PETUGAS</h1>
         </div>
-        <span class="text-xs bg-orange-500 text-white px-3 py-1 rounded-full font-bold uppercase tracking-wider">Mode Admin</span>
+        <span class="text-xs bg-emerald-600 text-white px-3 py-1 rounded-full font-bold uppercase">CLOUD CONNECTED</span>
     </header>
 
     <section class="max-w-6xl mx-auto w-full px-6 pt-6">
@@ -36,142 +36,105 @@
     <main class="p-6 grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto w-full flex-grow">
         <div class="space-y-6">
             <div class="bg-white p-6 rounded-3xl shadow-lg border-t-8 border-emerald-500">
-                <h3 class="text-emerald-700 font-black mb-4 tracking-wide">CUSTOMER SERVICE (CS)</h3>
+                <h3 class="text-emerald-700 font-black mb-4">CUSTOMER SERVICE (CS)</h3>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <button onclick="panggil('cs')" class="bg-emerald-600 text-white font-bold py-5 rounded-2xl hover:bg-emerald-700 transition shadow-lg active:scale-95 cursor-pointer">PANGGIL BERIKUTNYA</button>
-                    <button onclick="ulang('cs')" class="bg-orange-500 text-white font-bold py-5 rounded-2xl hover:bg-orange-600 transition shadow-lg active:scale-95 cursor-pointer">PANGGIL ULANG</button>
+                    <button onclick="panggil('cs')" class="bg-emerald-600 text-white font-bold py-5 rounded-2xl shadow hover:bg-emerald-700 transition active:scale-95">PANGGIL BERIKUTNYA</button>
+                    <button onclick="ulang('cs')" class="bg-orange-500 text-white font-bold py-5 rounded-2xl shadow hover:bg-orange-600 transition active:scale-95">PANGGIL ULANG</button>
                 </div>
             </div>
 
             <div class="bg-white p-6 rounded-3xl shadow-lg border-t-8 border-blue-900">
-                <h3 class="text-blue-900 font-black mb-4 tracking-wide">TELLER LAYANAN</h3>
+                <h3 class="text-blue-900 font-black mb-4">TELLER LAYANAN</h3>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <button onclick="panggil('teller')" class="bg-blue-900 text-white font-bold py-5 rounded-2xl hover:bg-blue-950 transition shadow-lg active:scale-95 cursor-pointer">PANGGIL BERIKUTNYA</button>
-                    <button onclick="ulang('teller')" class="bg-orange-500 text-white font-bold py-5 rounded-2xl hover:bg-orange-600 transition shadow-lg active:scale-95 cursor-pointer">PANGGIL ULANG</button>
+                    <button onclick="panggil('teller')" class="bg-blue-900 text-white font-bold py-5 rounded-2xl shadow hover:bg-blue-950 transition active:scale-95">PANGGIL BERIKUTNYA</button>
+                    <button onclick="ulang('teller')" class="bg-orange-500 text-white font-bold py-5 rounded-2xl shadow hover:bg-orange-600 transition active:scale-95">PANGGIL ULANG</button>
                 </div>
             </div>
         </div>
 
         <div class="space-y-6">
             <div class="bg-white p-6 rounded-3xl shadow-lg">
-                <h3 class="font-black text-gray-700 mb-4">⚙️ PENGATURAN MONITOR UTAMA</h3>
-                
-                <label class="block text-sm font-bold text-gray-500 mb-1">ID Video YouTube / Link</label>
-                <input id="input-url-youtube" type="text" class="w-full p-4 bg-gray-50 border rounded-xl mb-4 focus:ring-2 focus:ring-blue-500 text-sm" placeholder="Masukkan ID atau Link YouTube...">
-                <button onclick="updateVideo()" class="w-full bg-gray-800 text-white font-bold py-3 rounded-xl mb-6 cursor-pointer text-sm">UPDATE VIDEO INFO</button>
+                <h3 class="font-black text-gray-700 mb-4">⚙️ CONTROL CENTER</h3>
+                <label class="block text-sm font-bold text-gray-500 mb-1">ID Video YouTube</label>
+                <input id="input-url-youtube" type="text" class="w-full p-4 bg-gray-50 border rounded-xl mb-4" placeholder="Contoh: dQw4w9WgXcQ">
+                <button onclick="updateVideo()" class="w-full bg-gray-800 text-white font-bold py-3 rounded-xl mb-6">UPDATE VIDEO</button>
 
-                <label class="block text-sm font-bold text-gray-500 mb-1">Teks Pengumuman Berjalan</label>
-                <textarea id="input-pengumuman" class="w-full p-4 bg-gray-50 border rounded-xl mb-4 text-sm" rows="3" placeholder="Ketik kalimat pengumuman baru di sini..."></textarea>
-                <button onclick="updatePengumuman()" class="w-full bg-gray-800 text-white font-bold py-3 rounded-xl cursor-pointer text-sm">UPDATE TEKS BERJALAN</button>
+                <label class="block text-sm font-bold text-gray-500 mb-1">Teks Pengumuman</label>
+                <textarea id="input-pengumuman" class="w-full p-4 bg-gray-50 border rounded-xl mb-4" rows="3"></textarea>
+                <button onclick="updatePengumuman()" class="w-full bg-gray-800 text-white font-bold py-3 rounded-xl">UPDATE PENGUMUMAN</button>
             </div>
-
-            <button onclick="konfirmasiReset()" class="w-full bg-red-100 text-red-600 font-bold py-4 rounded-2xl border-2 border-red-300 hover:bg-red-600 hover:text-white transition cursor-pointer text-sm">⚠️ RESET NOMOR ANTRIAN KE 0</button>
+            <button onclick="konfirmasiReset()" class="w-full bg-red-100 text-red-600 font-bold py-4 rounded-2xl border-2 border-red-300">RESET KE 0</button>
         </div>
     </main>
 
-    <script>
-        let hariSekarang = new Date().getDate();
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
-        // Fungsi memperbarui angka live display di panel petugas
-        function perbaruiLiveStatus() {
-            const cs = localStorage.getItem('antreanCS') || 0;
-            const teller = localStorage.getItem('antreanTeller') || 0;
-            
-            document.getElementById('live-cs').innerText = 'CS-' + String(cs).padStart(3, '0');
-            document.getElementById('live-teller').innerText = 'TL-' + String(teller).padStart(3, '0');
-        }
+    <script>
+        // ⚠️ TEMPELKAN KONFIGURASI FIREBASE YANG SAMA DI SINI
+        const firebaseConfig = {
+            apiKey: "AIzaSyCY3RjNKQULXZmU18gxx3uKS0PE3D4kpgk",
+            authDomain: "antreankcpbrandan.firebaseapp.com",
+            databaseURL: "https://antreankcpbrandan-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "antreankcpbrandan",
+            storageBucket: "antreankcpbrandan.firebasestorage.app",
+            messagingSenderId: "58543339432",
+            appId: "1:58543339432:web:32977417fabdd83b5a8f9d",
+            measurementId: "G-Y8WZMRR4N0"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        let currentData = { cs: 0, teller: 0, videoId: 'dQw4w9WgXcQ', pengumuman: '' };
+
+        // Sinkronisasi status angka dari server cloud
+        database.ref('antrean').on('value', (snapshot) => {
+            if(snapshot.exists()) currentData = snapshot.val();
+            document.getElementById('live-cs').innerText = 'CS-' + String(currentData.cs || 0).padStart(3, '0');
+            document.getElementById('live-teller').innerText = 'TL-' + String(currentData.teller || 0).padStart(3, '0');
+        });
 
         function panggil(tipe) {
-            let key = tipe === 'cs' ? 'antreanCS' : 'antreanTeller';
-            let nomor = (parseInt(localStorage.getItem(key)) || 0) + 1;
-            localStorage.setItem(key, nomor);
-            
-            perbaruiLiveStatus(); // Langsung sinkronkan tampilan lokal admin
+            if (tipe === 'cs') currentData.cs = (currentData.cs || 0) + 1;
+            else currentData.teller = (currentData.teller || 0) + 1;
 
-            let kode = tipe === 'cs' ? 'C S ' : 'Teller ';
-            let tujuan = tipe === 'cs' ? 'Customer Service' : 'Teller';
-            suaraPanggilan(kode + nomor, tujuan);
+            database.ref('antrean').set(currentData);
+            
+            let nomor = tipe === 'cs' ? currentData.cs : currentData.teller;
+            database.ref('panggilanTerakhir').set({
+                nomorEjaan: (tipe === 'cs' ? 'C S ' : 'Teller ') + nomor,
+                tujuan: tipe === 'cs' ? 'Customer Service' : 'Teller',
+                timestamp: Firebase.database.ServerValue.TIMESTAMP
+            });
         }
 
         function ulang(tipe) {
-            let key = tipe === 'cs' ? 'antreanCS' : 'antreanTeller';
-            let nomor = localStorage.getItem(key) || 0;
-            
+            let nomor = tipe === 'cs' ? currentData.cs : currentData.teller;
             if(nomor > 0) {
-                let kode = tipe === 'cs' ? 'C S ' : 'Teller ';
-                let tujuan = tipe === 'cs' ? 'Customer Service' : 'Teller';
-                suaraPanggilan(kode + nomor, tujuan);
+                database.ref('panggilanTerakhir').set({
+                    nomorEjaan: (tipe === 'cs' ? 'C S ' : 'Teller ') + nomor,
+                    tujuan: tipe === 'cs' ? 'Customer Service' : 'Teller',
+                    timestamp: Firebase.database.ServerValue.TIMESTAMP
+                });
             }
         }
 
         function updateVideo() {
             let val = document.getElementById('input-url-youtube').value.trim();
-            if(!val) return alert("Isi link terlebih dahulu!");
-
-            let videoId = val;
-            try {
-                if (val.includes("v=")) {
-                    videoId = new URL(val).searchParams.get("v");
-                } else if (val.includes("youtu.be/")) {
-                    videoId = val.split("youtu.be/")[1].split(/[?#]/)[0];
-                } else if (val.includes("embed/")) {
-                    videoId = val.split("embed/")[1].split(/[?#]/)[0];
-                }
-            } catch(e) {}
-
-            if(videoId && videoId.length === 11) {
-                localStorage.setItem('youtubeVideoId', videoId);
-                document.getElementById('input-url-youtube').value = "";
-                alert('Video monitor utama berhasil diperbarui!');
-            } else {
-                alert("Format link/ID video tidak valid.");
-            }
+            if(val) { currentData.videoId = val; database.ref('antrean').set(currentData); alert('Video Cloud diupdate!'); }
         }
 
+        // Teks Pengumuman
         function updatePengumuman() {
             let val = document.getElementById('input-pengumuman').value.trim();
-            if(val) { 
-                localStorage.setItem('teksPengumuman', val); 
-                document.getElementById('input-pengumuman').value = "";
-                alert('Teks pengumuman monitor berhasil diperbarui!'); 
-            }
+            if(val) { currentData.pengumuman = val; database.ref('antrean').set(currentData); alert('Pengumuman Cloud diupdate!'); }
         }
 
         function konfirmasiReset() {
-            if(confirm("Apakah Anda yakin ingin mereset seluruh nomor antrean hari ini ke nol (0)?")) {
-                localStorage.setItem('antreanCS', 0);
-                localStorage.setItem('antreanTeller', 0);
-                perbaruiLiveStatus();
-                alert('Sistem antrean berhasil dikosongkan!');
+            if(confirm("Reset nomor antrean di seluruh internet untuk hari ini?")) {
+                database.ref('antrean').set({ cs: 0, teller: 0, videoId: 'dQw4w9WgXcQ', pengumuman: 'Selamat Datang di PT. Bank SUMUT.' });
             }
         }
-
-        function suaraPanggilan(nomor, tujuan) {
-            try {
-                const teks = `Nomor antrean, ${nomor}, silahkan menuju ke, ${tujuan}`;
-                const utterance = new SpeechSynthesisUtterance(teks);
-                utterance.lang = 'id-ID';
-                utterance.rate = 0.85;
-                window.speechSynthesis.speak(utterance);
-            } catch(e){}
-        }
-
-        // Pantau perubahan dari tab lain (jika di-reset dari tempat lain)
-        window.addEventListener('storage', perbaruiLiveStatus);
-        
-        // Muat data status saat pertama kali halaman admin dibuka
-        window.onload = perbaruiLiveStatus;
-
-        // Otomatis reset data lokal jika berganti hari
-        setInterval(() => {
-            const sekarang = new Date();
-            if (sekarang.getDate() !== hariSekarang) {
-                hariSekarang = sekarang.getDate();
-                localStorage.setItem('antreanCS', 0);
-                localStorage.setItem('antreanTeller', 0);
-                perbaruiLiveStatus();
-            }
-        }, 1000);
     </script>
 </body>
 </html>
