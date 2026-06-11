@@ -119,19 +119,33 @@
             document.getElementById('live-cs').innerText = 'CS-' + String(currentData.cs || 0).padStart(3, '0');
             document.getElementById('live-teller').innerText = 'TL-' + String(currentData.teller || 0).padStart(3, '0');
             
-            // Render Daftar Video dengan Penambahan Tombol Putar
+            // Render Daftar Video dengan Penanda LIVE PLAYING
             const boxPlaylist = document.getElementById('list-playlist-video');
             boxPlaylist.innerHTML = "";
             if (Object.keys(rawVideoObjects).length > 0) {
+                let indexCounter = 0;
                 Object.entries(rawVideoObjects).forEach(([key, idVideo]) => {
+                    
+                    // Cek jika ini adalah video urutan teratas (yang sedang berjalan di TV)
+                    const isLive = (indexCounter === 0);
+                    
+                    const borderStyle = isLive ? 'border-emerald-500 bg-emerald-50/40' : 'border-gray-200 bg-white';
+                    const badgeLive = isLive ? `<span class="ml-2 bg-emerald-600 text-white font-extrabold px-1.5 py-0.5 rounded text-[9px] uppercase tracking-wider animate-pulse flex items-center gap-1"><span class="w-1.5 h-1.5 bg-white rounded-full"></span>LIVE PLAYING</span>` : '';
+                    const playButtonHide = isLive ? 'invisible pointer-events-none' : ''; // Sembunyikan tombol play jika sedang live
+
                     boxPlaylist.innerHTML += `
-                        <div class="flex justify-between items-center bg-white p-2 border rounded-lg shadow-sm">
-                            <span class="font-mono font-bold text-gray-700">${idVideo}</span>
+                        <div class="flex justify-between items-center p-2 border rounded-lg shadow-sm transition-all duration-300 ${borderStyle}">
+                            <div class="flex items-center">
+                                <span class="font-mono font-bold text-gray-700">${idVideo}</span>
+                                ${badgeLive}
+                            </div>
                             <div class="flex gap-3">
-                                <button onclick="putarVideoInstan('${key}')" class="text-emerald-600 font-extrabold hover:text-emerald-800 cursor-pointer">▶ Putar</button>
+                                <button onclick="putarVideoInstan('${key}')" class="text-emerald-600 font-extrabold hover:text-emerald-800 cursor-pointer ${playButtonHide}">▶ Putar</button>
                                 <button onclick="hapusVideo('${key}')" class="text-red-500 font-bold hover:text-red-700 px-1 cursor-pointer">✕ Hapus</button>
                             </div>
                         </div>`;
+                    
+                    indexCounter++;
                 });
             } else {
                 boxPlaylist.innerHTML = `<p class="text-gray-400 italic p-1">Tidak ada video khusus. TV memutar video bawaan.</p>`;
@@ -176,27 +190,19 @@
             if(confirm("Hapus video ini dari playlist?")) { database.ref(`antrean/videos/${key}`).remove(); }
         }
 
-        // FUNGSI LOGIKA PUTAR VIDEO SECARA INSTAN SAAAT ITU JUGA
         function putarVideoInstan(targetKey) {
             const idVideoTarget = rawVideoObjects[targetKey];
             if(!idVideoTarget) return;
 
-            // 1. Ambil semua data list playlist video yang ada saat ini
             const daftarLengkap = Object.entries(rawVideoObjects);
             
-            // 2. Kosongkan jalur database video sementara untuk menyusun ulang urutan
             database.ref('antrean/videos').remove().then(() => {
-                
-                // 3. Masukkan video target terlebih dahulu agar berada di posisi indeks ke-0 (paling atas)
                 database.ref('antrean/videos').push(idVideoTarget).then(() => {
-                    
-                    // 4. Masukkan kembali sisa video lainnya di bawahnya
                     daftarLengkap.forEach(([key, idVideo]) => {
                         if(key !== targetKey) {
                             database.ref('antrean/videos').push(idVideo);
                         }
                     });
-
                 });
             });
         }
