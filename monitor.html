@@ -64,12 +64,17 @@
         </div>
 
         <div class="lg:col-span-8 h-full bg-black rounded-[1.5rem] shadow-xl overflow-hidden border-2 border-white relative box-border">
-            <div id="player" class="absolute top-0 left-0 w-full h-full object-cover"></div>
+            <iframe id="youtube-player" 
+                class="absolute top-0 left-0 w-full h-full object-cover" 
+                src="" 
+                title="Video Player" 
+                frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowfullscreen>
+            </iframe>
         </div>
     </main>
 
-    <script src="https://www.youtube.com/iframe_api"></script>
-    
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
@@ -89,57 +94,20 @@
         const database = firebase.database();
         window.loadedTime = Date.now();
 
-        let ytPlayer;
-        let currentVideos = ['dQw4w9WgXcQ'];
+        let currentVideos = [];
+        let urlPlaylistNormal = ""; 
         let isPlayingNationalAnthem = false;
-        let isUnlocked = false;
 
         const idIndonesiaRaya = "eZgZ9eeS6Hk"; 
-        const durasiLaguMilidetik = 150000;
-
-        // ATUR TINGKAT SEBERAPA KERAS VOLUME VIDEO YOUTUBE DI SINI (0 sampai 100)
-        const SETTING_VOLUME_VIDEO = 20; 
-
-        // Inisialisasi YouTube Player saat API siap
-        function onYouTubeIframeAPIReady() {
-            ytPlayer = new YT.Player('player', {
-                height: '100%',
-                width: '100%',
-                videoId: currentVideos[0],
-                playerVars: {
-                    'autoplay': 1,
-                    'controls': 0,
-                    'rel': 0,
-                    'showinfo': 0,
-                    'modestbranding': 1,
-                    'loop': 1,
-                    'playlist': currentVideos.join(',')
-                },
-                events: {
-                    'onReady': onPlayerReady
-                }
-            });
-        }
-
-        function onPlayerReady(event) {
-            // Pasang volume pelan otomatis saat player siap
-            event.target.setVolume(SETTING_VOLUME_VIDEO);
-            if (isUnlocked && !isPlayingNationalAnthem) {
-                event.target.playVideo();
-            }
-        }
+        const durasiLaguMilidetik = 150000; 
 
         function unlockAudio() {
-            isUnlocked = true;
             document.getElementById('audio-unlocker').classList.add('opacity-0', 'pointer-events-none');
-            
             try {
                 window.speechSynthesis.speak(new SpeechSynthesisUtterance(""));
             } catch(e){}
-
-            if (ytPlayer && typeof ytPlayer.playVideo === 'function') {
-                ytPlayer.setVolume(SETTING_VOLUME_VIDEO);
-                ytPlayer.playVideo();
+            if(urlPlaylistNormal && !isPlayingNationalAnthem) {
+                document.getElementById('youtube-player').src = urlPlaylistNormal;
             }
         }
 
@@ -171,15 +139,19 @@
             if (snapshot.exists()) currentVideos = Object.values(snapshot.val());
             if (currentVideos.length === 0) currentVideos.push('dQw4w9WgXcQ'); 
             
-            if (ytPlayer && typeof ytPlayer.cuePlaylist === 'function' && !isPlayingNationalAnthem) {
-                // Perbarui playlist di dalam mesin YouTube tanpa me-refresh paksa player
-                const currentVideoId = ytPlayer.getVideoData()['video_id'];
-                if (currentVideoId !== currentVideos[0]) {
-                    ytPlayer.loadPlaylist(currentVideos, 0, 0);
-                    ytPlayer.setVolume(SETTING_VOLUME_VIDEO);
-                }
-            }
+            updateVideoSrc();
         });
+
+        function updateVideoSrc() {
+            const videoUtama = currentVideos[0];
+            const stringPlaylist = currentVideos.join(',');
+
+            urlPlaylistNormal = `https://www.youtube.com/embed/${videoUtama}?autoplay=1&mute=0&loop=1&playlist=${stringPlaylist}&controls=0&rel=0`;
+            
+            if (!isPlayingNationalAnthem && document.getElementById('audio-unlocker').classList.contains('pointer-events-none')) {
+                document.getElementById('youtube-player').src = urlPlaylistNormal;
+            }
+        }
 
         // PENGATUR JAM & SCHEDULER JAM 10 PAGI
         setInterval(() => {
@@ -193,22 +165,17 @@
         }, 1000);
 
         function jalankanIndonesiaRaya() {
-            if (!ytPlayer || typeof ytPlayer.loadVideoById !== 'function') return;
-            
             isPlayingNationalAnthem = true;
-            // Saat lagu kebangsaan diputar, besarkan volume ke 100% penuh otomatis
-            ytPlayer.setVolume(100);
-            ytPlayer.loadVideoById(idIndonesiaRaya);
+            const player = document.getElementById('youtube-player');
+            player.src = `https://www.youtube.com/embed/${idIndonesiaRaya}?autoplay=1&mute=0&controls=0&rel=0`;
 
             setTimeout(() => {
                 isPlayingNationalAnthem = false;
-                // Kembalikan ke volume musik latar pelan (20%) setelah lagu selesai
-                ytPlayer.setVolume(SETTING_VOLUME_VIDEO);
-                ytPlayer.loadPlaylist(currentVideos, 0, 0);
+                player.src = urlPlaylistNormal; 
             }, durasiLaguMilidetik);
         }
 
-        // SUARA PANGGILAN ANTRIAN (Diatur volume penuh 100%)
+        // SUARA PANGGILAN ANTRIAN
         database.ref('panggilanTerakhir').on('value', (snapshot) => {
             const data = snapshot.val();
             if (data && data.timestamp > window.loadedTime) {
@@ -223,7 +190,6 @@
                 const utterance = new SpeechSynthesisUtterance(teks);
                 utterance.lang = 'id-ID';
                 utterance.rate = 0.85;
-                utterance.volume = 1.0; // PENGATURAN VOLUME SUARA GOOGLE ANTRIAN (1.0 artinya Maksimal/100%)
                 window.speechSynthesis.speak(utterance);
             } catch(e){}
         }
