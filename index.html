@@ -137,17 +137,16 @@
             }
         });
 
-        // FUNGSI EKSTRAKSI OTOMATIS LINK YOUTUBE
+        // Filter otomatis pemotong link YouTube utuh
         function ekstrakIDYouTube(url) {
             url = url.trim();
-            // Pola regex untuk mendeteksi berbagai jenis format link YouTube
             const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
             const match = url.match(regExp);
             
             if (match && match[2].length === 11) {
                 return match[2];
             } else if (url.length === 11) {
-                return url; // Jika user sudah menginputkan ID langsung 11 karakter
+                return url; 
             } else {
                 return null;
             }
@@ -159,11 +158,9 @@
             const idVideo = ekstrakIDYouTube(rawValue);
 
             if (idVideo) {
-                database.ref('antrean/videos').push(idVideo).then(() => { 
-                    input.value = ""; 
-                });
+                database.ref('antrean/videos').push(idVideo).then(() => { input.value = ""; });
             } else { 
-                alert("Format link tidak valid! Pastikan menyalin link video resmi dari YouTube."); 
+                alert("Format link tidak valid! Sila copy link resmi dari YouTube."); 
             }
         }
 
