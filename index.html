@@ -88,7 +88,6 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         let currentData = { cs: 0, teller: 0, videoId: 'dQw4w9WgXcQ', pengumuman: '' };
-        let isFirstLoad = true; // Penanda untuk pengisian otomatis awal saja
 
         // Sinkronisasi data live display admin dari server internet
         database.ref('antrean').on('value', (snapshot) => {
@@ -98,15 +97,12 @@
             document.getElementById('live-cs').innerText = 'CS-' + String(currentData.cs || 0).padStart(3, '0');
             document.getElementById('live-teller').innerText = 'TL-' + String(currentData.teller || 0).padStart(3, '0');
             
-            // 2. PERBAIKAN: Menampilkan ID Video dan Pengumuman aktif langsung ke dalam textbox saat halaman dibuka
-            if (isFirstLoad) {
-                if (currentData.videoId) {
-                    document.getElementById('input-url-youtube').value = currentData.videoId;
-                }
-                if (currentData.pengumuman) {
-                    document.getElementById('input-pengumuman').value = currentData.pengumuman;
-                }
-                isFirstLoad = false; // Matikan penanda setelah pemuatan pertama agar tidak mengganggu ketikan petugas
+            // 2. TAMPILKAN VALUE SECARA REAL-TIME (Selalu sinkron dengan database cloud)
+            if (currentData.videoId) {
+                document.getElementById('input-url-youtube').value = currentData.videoId;
+            }
+            if (currentData.pengumuman) {
+                document.getElementById('input-pengumuman').value = currentData.pengumuman;
             }
         });
 
@@ -165,9 +161,6 @@
         function konfirmasiReset() {
             if(confirm("Reset nomor antrean di seluruh internet untuk hari ini?")) {
                 database.ref('antrean').set({ cs: 0, teller: 0, videoId: 'dQw4w9WgXcQ', pengumuman: 'Selamat Datang di PT. Bank SUMUT. Kepercayaan Anda adalah Prioritas Kami.' });
-                // Reset juga tampilan kolom teks ke pengaturan bawaan
-                document.getElementById('input-url-youtube').value = "dQw4w9WgXcQ";
-                document.getElementById('input-pengumuman').value = "Selamat Datang di PT. Bank SUMUT. Kepercayaan Anda adalah Prioritas Kami.";
                 alert('Sistem berhasil dikosongkan!');
             }
         }
