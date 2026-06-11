@@ -90,7 +90,7 @@
         window.loadedTime = Date.now();
 
         let ytPlayer;
-        let currentVideos = ['dQw4w9WgXcQ'];
+        let currentVideos = ['c9slVkM8km0']; // DEFAULT BARU TERPASANG
         let isPlayingNationalAnthem = false;
         let isUnlocked = false;
 
@@ -111,7 +111,7 @@
                     'showinfo': 0,
                     'modestbranding': 1,
                     'loop': 1,
-                    'mute': 1, // KUNCI UTAMA: Mulai dalam keadaan mute agar Autoplay lolos sensor browser
+                    'mute': 1,
                     'playlist': currentVideos.join(',')
                 },
                 events: {
@@ -121,10 +121,7 @@
         }
 
         function onPlayerReady(event) {
-            // Jalankan video secara paksa
             event.target.playVideo();
-            
-            // Jika user sebelumnya sudah klik/mengizinkan, langsung buka mute dan set volume
             if (isUnlocked) {
                 event.target.unMute();
                 event.target.setVolume(SETTING_VOLUME_VIDEO);
@@ -139,7 +136,6 @@
                 window.speechSynthesis.speak(new SpeechSynthesisUtterance(""));
             } catch(e){}
 
-            // Buka suara video YouTube dan set ke volume musik latar pelan
             if (ytPlayer && typeof ytPlayer.playVideo === 'function') {
                 ytPlayer.unMute();
                 ytPlayer.setVolume(SETTING_VOLUME_VIDEO);
@@ -173,7 +169,7 @@
         database.ref('antrean/videos').on('value', (snapshot) => {
             currentVideos = [];
             if (snapshot.exists()) currentVideos = Object.values(snapshot.val());
-            if (currentVideos.length === 0) currentVideos.push('dQw4w9WgXcQ'); 
+            if (currentVideos.length === 0) currentVideos.push('c9slVkM8km0'); // DEFAULT BARU JIKA FIREBASE KOSONG
             
             if (ytPlayer && typeof ytPlayer.cuePlaylist === 'function' && !isPlayingNationalAnthem) {
                 const currentVideoId = ytPlayer.getVideoData()['video_id'];

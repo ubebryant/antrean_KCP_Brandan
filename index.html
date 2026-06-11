@@ -146,7 +146,7 @@
                     indexCounter++;
                 });
             } else {
-                boxPlaylist.innerHTML = `<p class="text-gray-400 italic p-1">Tidak ada video khusus. TV memutar video bawaan.</p>`;
+                boxPlaylist.innerHTML = `<p class="text-gray-400 italic p-1">Tidak ada video khusus. TV memutar video bawaan (c9slVkM8km0).</p>`;
             }
 
             // Render Daftar Pengumuman
@@ -188,21 +188,14 @@
             if(confirm("Hapus video ini dari playlist?")) { database.ref(`antrean/videos/${key}`).remove(); }
         }
 
-        // ==========================================
-        // PERBAIKAN UTAMA: LOGIKA PUTAR VIDEO INSTAN
-        // ==========================================
         function putarVideoInstan(targetKey) {
             const idVideoTarget = rawVideoObjects[targetKey];
             if(!idVideoTarget) return;
 
-            // 1. Buat objek penampung baru di memori lokal PC
             let playlistBaru = {};
-            
-            // 2. Buat ID acak unik (seperti cara kerja .push() Firebase) untuk video utama
             const randomKeyUtama = 'key_' + Math.random().toString(36).substr(2, 9);
             playlistBaru[randomKeyUtama] = idVideoTarget;
             
-            // 3. Masukkan sisa video lainnya secara berurutan di bawahnya
             Object.entries(rawVideoObjects).forEach(([key, idVideo]) => {
                 if(key !== targetKey) {
                     const randomKeySisa = 'key_' + Math.random().toString(36).substr(2, 9);
@@ -210,7 +203,6 @@
                 }
             });
 
-            // 4. Update data sekaligus menggunakan .set() agar struktur urutan terkunci sempurna
             database.ref('antrean/videos').set(playlistBaru);
         }
 
@@ -234,7 +226,7 @@
             });
 
             const randomKeyTerakhir = 'key_' + Math.random().toString(36).substr(2, 9);
-            playlistBaru[randomKeyTerakhir] = idVideoPertama;
+            playlistBaru[randomKeyTerakhir] = idVideoFirst;
 
             database.ref('antrean/videos').set(playlistBaru);
         }
