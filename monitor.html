@@ -2,74 +2,91 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Monitor Antrean - PT. Bank SUMUT</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Petugas - Bank SUMUT Online</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght=700&display=swap');
         .font-digital { font-family: 'Orbitron', sans-serif; }
     </style>
 </head>
-<body class="bg-slate-100 font-sans h-screen w-screen flex flex-col overflow-hidden select-none box-border p-0 m-0">
+<body class="bg-gray-100 font-sans min-h-screen flex flex-col">
 
-    <div id="audio-unlocker" class="fixed inset-0 bg-slate-900/95 z-50 flex flex-col justify-center items-center p-4 transition-all duration-500">
-        <div class="bg-white p-8 rounded-3xl max-w-md w-full text-center shadow-2xl border-t-8 border-blue-900">
-            <div class="w-20 h-20 bg-blue-100 rounded-full flex justify-center items-center mx-auto mb-4 animate-bounce">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-blue-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C11.923 3.663 13 4.109 13 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
-                </svg>
-            </div>
-            <h3 class="text-xl font-black text-slate-800 mb-2">AKTIFKAN SUARA MONITOR</h3>
-            <p class="text-sm text-slate-500 mb-6">Klik tombol di bawah ini agar suara panggilan antrean dan video TV aktif bersuara lancar.</p>
-            <button onclick="unlockAudio()" class="w-full bg-[#00205B] text-white font-bold py-4 rounded-xl shadow-lg hover:bg-blue-950 transition active:scale-95 cursor-pointer tracking-wide">IZINKAN & AKTIFKAN SUARA</button>
+    <header class="bg-white p-4 shadow flex justify-between items-center border-b-2 border-orange-500">
+        <div class="flex items-center gap-3">
+            <img src="Logo_Bank_Sumut.png" alt="Logo" class="h-10 w-auto object-contain">
+            <h1 class="text-blue-900 font-black tracking-wide hidden sm:block">PANEL ONLINE PETUGAS</h1>
         </div>
-    </div>
-
-    <header class="h-[10vh] min-h-[60px] bg-white px-6 shadow-md flex justify-between items-center border-b-2 border-slate-200 z-10 flex-shrink-0 box-border">
-        <div class="flex items-center gap-4 h-full py-2">
-            <img src="Logo_Bank_Sumut.png" alt="Logo Bank SUMUT" class="h-full max-h-[50px] md:max-h-[60px] w-auto object-contain">
-            <div class="h-8 w-[2px] bg-slate-300"></div>
-            <div>
-                <h1 class="text-lg md:text-xl font-black tracking-tighter text-[#00205B] leading-none">KCP. PANGKALAN BRANDAN</h1>
-                <p class="text-[10px] font-bold text-slate-500 tracking-widest uppercase mt-0.5">Layanan Antrean Digital Online</p>
-            </div>
-        </div>
-        <div id="jam" class="text-xl md:text-2xl font-digital bg-[#00205B] text-white px-5 py-1.5 rounded-xl border border-blue-800 shadow-inner">00:00:00</div>
+        <span class="text-xs bg-emerald-600 text-white px-3 py-1 rounded-full font-bold uppercase">CLOUD CONNECTED</span>
     </header>
 
-    <div class="h-[7vh] min-h-[40px] bg-[#00205B] text-white px-6 flex items-center shadow-md border-b-4 border-[#F37021] z-10 flex-shrink-0 box-border">
-        <div class="bg-[#F37021] text-white font-black px-3 py-1 rounded-md text-[11px] md:text-xs shrink-0 mr-4 shadow-md tracking-wide">INFO TERKINI</div>
-        <div class="flex-grow overflow-hidden flex items-center">
-            <marquee id="marquee-text" class="text-sm md:text-lg font-bold tracking-wide italic text-orange-300">Selamat Datang di PT. Bank SUMUT.</marquee>
-        </div>
-    </div>
-
-    <main class="h-[83vh] p-4 grid grid-cols-1 lg:grid-cols-12 gap-4 flex-shrink-0 box-border overflow-hidden">
-        <div class="lg:col-span-4 flex flex-col gap-4 h-full overflow-hidden box-border">
-            <div class="flex-1 bg-white rounded-[1.5rem] shadow-xl border-l-[10px] border-emerald-500 p-4 flex flex-col justify-between items-center overflow-hidden box-border">
-                <h2 class="text-sm md:text-base font-black text-slate-400 uppercase tracking-widest text-center">CUSTOMER SERVICE</h2>
-                <div class="bg-slate-50 w-full flex-grow flex justify-center items-center shadow-inner my-2 rounded-2xl min-h-[50px] overflow-hidden">
-                    <p id="display-cs" class="text-5xl md:text-6xl xl:text-7xl font-digital text-emerald-600 drop-shadow-sm tracking-tight leading-none">CS-000</p>
-                </div>
-                <div class="bg-emerald-100 text-emerald-700 text-[11px] md:text-xs font-black px-5 py-1.5 rounded-full border border-emerald-400 animate-pulse text-center w-auto">MENUJU MEJA CS</div>
+    <section class="max-w-6xl mx-auto w-full px-6 pt-6">
+        <div class="bg-slate-800 text-white p-4 rounded-2xl shadow-md grid grid-cols-2 gap-4 border-b-4 border-blue-900">
+            <div class="text-center border-r border-slate-700 py-1">
+                <p class="text-xs font-bold text-emerald-400 uppercase tracking-widest">Live Monitor CS</p>
+                <p id="live-cs" class="text-3xl font-digital text-white mt-1">CS-000</p>
             </div>
-
-            <div class="flex-1 bg-white rounded-[1.5rem] shadow-xl border-l-[10px] border-[#00205B] p-4 flex flex-col justify-between items-center overflow-hidden box-border">
-                <h2 class="text-sm md:text-base font-black text-slate-400 uppercase tracking-widest text-center">TELLER</h2>
-                <div class="bg-slate-50 w-full flex-grow flex justify-center items-center shadow-inner my-2 rounded-2xl min-h-[50px] overflow-hidden">
-                    <p id="display-teller" class="text-5xl md:text-6xl xl:text-7xl font-digital text-[#00205B] drop-shadow-md tracking-tight leading-none">TL-000</p>
-                </div>
-                <div class="bg-blue-100 text-[#00205B] text-[11px] md:text-xs font-black px-5 py-1.5 rounded-full border border-[#00205B] text-center w-auto">MENUJU MEJA TELLER</div>
+            <div class="text-center py-1">
+                <p class="text-xs font-bold text-orange-400 uppercase tracking-widest">Live Monitor Teller</p>
+                <p id="live-teller" class="text-3xl font-digital text-white mt-1">TL-000</p>
             </div>
         </div>
+    </section>
 
-        <div class="lg:col-span-8 h-full bg-black rounded-[1.5rem] shadow-xl overflow-hidden border-2 border-white relative box-border">
-            <div id="player" class="absolute top-0 left-0 w-full h-full object-cover"></div>
+    <main class="p-6 grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto w-full flex-grow">
+        <div class="space-y-6">
+            <div class="bg-white p-6 rounded-3xl shadow-lg border-t-8 border-emerald-500">
+                <h3 class="text-emerald-700 font-black mb-4">CUSTOMER SERVICE (CS)</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <button onclick="panggil('cs')" class="bg-emerald-600 text-white font-bold py-5 rounded-2xl shadow hover:bg-emerald-700 transition active:scale-95 cursor-pointer">PANGGIL BERIKUTNYA</button>
+                    <button onclick="ulang('cs')" class="bg-orange-500 text-white font-bold py-5 rounded-2xl shadow hover:bg-orange-600 transition active:scale-95 cursor-pointer">PANGGIL ULANG</button>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-3xl shadow-lg border-t-8 border-blue-900">
+                <h3 class="text-blue-900 font-black mb-4">TELLER LAYANAN</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <button onclick="panggil('teller')" class="bg-blue-900 text-white font-bold py-5 rounded-2xl shadow hover:bg-blue-950 transition active:scale-95 cursor-pointer">PANGGIL BERIKUTNYA</button>
+                    <button onclick="ulang('teller')" class="bg-orange-500 text-white font-bold py-5 rounded-2xl shadow hover:bg-orange-600 transition active:scale-95 cursor-pointer">PANGGIL ULANG</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="space-y-6">
+            <div class="bg-white p-6 rounded-3xl shadow-lg">
+                <h3 class="font-black text-gray-700 mb-4">⚙️ CONTROL CENTER</h3>
+                
+                <div class="flex justify-between items-center mb-1">
+                    <label class="block text-sm font-bold text-gray-500">Paste Link / ID Video YouTube Baru</label>
+                    <button onclick="nextVideo()" class="bg-orange-500 text-white font-extrabold px-3 py-1 rounded-lg text-[11px] hover:bg-orange-600 shadow-sm active:scale-95 transition cursor-pointer">▶️ NEXT VIDEO</button>
+                </div>
+                
+                <div class="flex gap-2 mb-3">
+                    <input id="input-url-youtube" type="text" class="flex-grow p-3 bg-gray-50 border rounded-xl text-sm font-semibold text-gray-700" placeholder="Paste link video atau ID di sini...">
+                    <button onclick="tambahVideo()" class="bg-blue-900 text-white font-bold px-4 rounded-xl hover:bg-blue-950 cursor-pointer text-xs">TAMBAH</button>
+                </div>
+                <label class="block text-[11px] font-bold text-gray-400 mb-1">Daftar Video Aktif di TV:</label>
+                <div id="list-playlist-video" class="space-y-2 max-h-[110px] overflow-y-auto border p-2 rounded-xl bg-gray-50 mb-6 text-xs text-gray-600">
+                    <p class="text-gray-400 italic">Memuat video cloud...</p>
+                </div>
+
+                <hr class="my-4 border-gray-200">
+
+                <label class="block text-sm font-bold text-gray-500 mb-1">Tambah Teks Informasi Baru</label>
+                <div class="flex gap-2 mb-3">
+                    <input id="input-pengumuman" type="text" class="flex-grow p-3 bg-gray-50 border rounded-xl text-sm font-semibold text-gray-700" placeholder="Ketik kalimat informasi di sini...">
+                    <button onclick="tambahPengumuman()" class="bg-emerald-600 text-white font-bold px-4 rounded-xl hover:bg-emerald-700 cursor-pointer text-xs">TAMBAH</button>
+                </div>
+                <label class="block text-[11px] font-bold text-gray-400 mb-1">Daftar Informasi Berjalan Saat Ini:</label>
+                <div id="list-playlist-teks" class="space-y-2 max-h-[110px] overflow-y-auto border p-2 rounded-xl bg-gray-50 mb-4 text-xs text-gray-600">
+                    <p class="text-gray-400 italic">Memuat teks cloud...</p>
+                </div>
+            </div>
+            
+            <button onclick="konfirmasiResetHarian()" class="w-full bg-orange-50 text-orange-700 font-bold py-4 rounded-2xl border-2 border-orange-300 hover:bg-orange-600 hover:text-white transition cursor-pointer text-sm shadow-sm">RESET NOMOR ANTRIAN KE 0 (Video & Teks Tetap Aman)</button>
         </div>
     </main>
 
-    <script src="https://www.youtube.com/iframe_api"></script>
-    
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
@@ -87,164 +104,160 @@
 
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
-        window.loadedTime = Date.now();
+        
+        let currentData = { cs: 0, teller: 0 };
+        let rawVideoObjects = {}; 
 
-        let ytPlayer;
-        let currentVideos = ['dQw4w9WgXcQ'];
-        let isPlayingNationalAnthem = false;
-        let isUnlocked = false;
+        database.ref('antrean').on('value', (snapshot) => {
+            if(snapshot.exists()) {
+                const data = snapshot.val();
+                currentData.cs = data.cs || 0;
+                currentData.teller = data.teller || 0;
+                rawVideoObjects = data.videos || {};
+            }
+            
+            document.getElementById('live-cs').innerText = 'CS-' + String(currentData.cs || 0).padStart(3, '0');
+            document.getElementById('live-teller').innerText = 'TL-' + String(currentData.teller || 0).padStart(3, '0');
+            
+            // Render Daftar Video dengan Penambahan Tombol Putar
+            const boxPlaylist = document.getElementById('list-playlist-video');
+            boxPlaylist.innerHTML = "";
+            if (Object.keys(rawVideoObjects).length > 0) {
+                Object.entries(rawVideoObjects).forEach(([key, idVideo]) => {
+                    boxPlaylist.innerHTML += `
+                        <div class="flex justify-between items-center bg-white p-2 border rounded-lg shadow-sm">
+                            <span class="font-mono font-bold text-gray-700">${idVideo}</span>
+                            <div class="flex gap-3">
+                                <button onclick="putarVideoInstan('${key}')" class="text-emerald-600 font-extrabold hover:text-emerald-800 cursor-pointer">▶ Putar</button>
+                                <button onclick="hapusVideo('${key}')" class="text-red-500 font-bold hover:text-red-700 px-1 cursor-pointer">✕ Hapus</button>
+                            </div>
+                        </div>`;
+                });
+            } else {
+                boxPlaylist.innerHTML = `<p class="text-gray-400 italic p-1">Tidak ada video khusus. TV memutar video bawaan.</p>`;
+            }
 
-        const idIndonesiaRaya = "eZgZ9eeS6Hk"; 
-        const durasiLaguMilidetik = 150000;
-        const SETTING_VOLUME_VIDEO = 10; 
+            // Render Daftar Pengumuman Multi-Informasi
+            const boxTeks = document.getElementById('list-playlist-teks');
+            boxTeks.innerHTML = "";
+            if (snapshot.val() && snapshot.val().pengumumanMulti) {
+                Object.entries(snapshot.val().pengumumanMulti).forEach(([key, teksInfo]) => {
+                    boxTeks.innerHTML += `
+                        <div class="flex justify-between items-center bg-white p-2 border rounded-lg shadow-sm">
+                            <span class="truncate pr-4 text-gray-700 font-medium">${teksInfo}</span>
+                            <button onclick="hapusPengumuman('${key}')" class="text-red-500 font-bold hover:text-red-700 px-1 shrink-0 cursor-pointer">✕ Hapus</button>
+                        </div>`;
+                });
+            } else {
+                boxTeks.innerHTML = `<p class="text-gray-400 italic p-1">Tidak ada informasi khusus. TV memutar teks bawaan.</p>`;
+            }
+        });
 
-        // Inisialisasi YouTube Player
-        function onYouTubeIframeAPIReady() {
-            ytPlayer = new YT.Player('player', {
-                height: '100%',
-                width: '100%',
-                videoId: currentVideos[0],
-                playerVars: {
-                    'autoplay': 1,
-                    'controls': 0,
-                    'rel': 0,
-                    'showinfo': 0,
-                    'modestbranding': 1,
-                    'loop': 1,
-                    'playlist': currentVideos.join(',')
-                },
-                events: {
-                    'onReady': onPlayerReady
-                }
+        function ekstrakIDYouTube(url) {
+            url = url.trim();
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+            const match = url.match(regExp);
+            if (match && match[2].length === 11) return match[2];
+            else if (url.length === 11) return url; 
+            else return null;
+        }
+
+        function tambahVideo() {
+            const input = document.getElementById('input-url-youtube');
+            const rawValue = input.value.trim();
+            const idVideo = ekstrakIDYouTube(rawValue);
+
+            if (idVideo) {
+                database.ref('antrean/videos').push(idVideo).then(() => { input.value = ""; });
+            } else { alert("Format link tidak valid!"); }
+        }
+
+        function hapusVideo(key) {
+            if(confirm("Hapus video ini dari playlist?")) { database.ref(`antrean/videos/${key}`).remove(); }
+        }
+
+        // FUNGSI LOGIKA PUTAR VIDEO SECARA INSTAN SAAAT ITU JUGA
+        function putarVideoInstan(targetKey) {
+            const idVideoTarget = rawVideoObjects[targetKey];
+            if(!idVideoTarget) return;
+
+            // 1. Ambil semua data list playlist video yang ada saat ini
+            const daftarLengkap = Object.entries(rawVideoObjects);
+            
+            // 2. Kosongkan jalur database video sementara untuk menyusun ulang urutan
+            database.ref('antrean/videos').remove().then(() => {
+                
+                // 3. Masukkan video target terlebih dahulu agar berada di posisi indeks ke-0 (paling atas)
+                database.ref('antrean/videos').push(idVideoTarget).then(() => {
+                    
+                    // 4. Masukkan kembali sisa video lainnya di bawahnya
+                    daftarLengkap.forEach(([key, idVideo]) => {
+                        if(key !== targetKey) {
+                            database.ref('antrean/videos').push(idVideo);
+                        }
+                    });
+
+                });
             });
         }
 
-        function onPlayerReady(event) {
-            event.target.setVolume(SETTING_VOLUME_VIDEO);
-            if (isUnlocked && !isPlayingNationalAnthem) {
-                event.target.playVideo();
+        function nextVideo() {
+            const keys = Object.keys(rawVideoObjects);
+            if(keys.length <= 1) {
+                alert("Minimal harus ada 2 video di dalam daftar untuk menggunakan fitur Next!");
+                return;
             }
+            const keyPertama = keys[0];
+            const idVideoPertama = rawVideoObjects[keyPertama];
+
+            database.ref('antrean/videos').push(idVideoPertama).then(() => {
+                database.ref(`antrean/videos/${keyPertama}`).remove();
+            });
         }
 
-        function unlockAudio() {
-            isUnlocked = true;
-            document.getElementById('audio-unlocker').classList.add('opacity-0', 'pointer-events-none');
+        function tambahPengumuman() {
+            const input = document.getElementById('input-pengumuman');
+            const teksInfo = input.value.trim();
+            if (teksInfo) {
+                database.ref('antrean/pengumumanMulti').push(teksInfo).then(() => { input.value = ""; });
+            } else { alert("Teks pengumuman tidak boleh kosong!"); }
+        }
+
+        function hapusPengumuman(key) {
+            if(confirm("Hapus teks informasi ini dari TV?")) { database.ref(`antrean/pengumumanMulti/${key}`).remove(); }
+        }
+
+        function panggil(tipe) {
+            if (tipe === 'cs') currentData.cs = Number(currentData.cs || 0) + 1;
+            else currentData.teller = Number(currentData.teller || 0) + 1;
+
+            database.ref('antrean/cs').set(currentData.cs);
+            database.ref('antrean/teller').set(currentData.teller);
             
-            try {
-                window.speechSynthesis.speak(new SpeechSynthesisUtterance(""));
-            } catch(e){}
+            let nomor = tipe === 'cs' ? currentData.cs : currentData.teller;
+            database.ref('panggilanTerakhir').set({
+                nomorEjaan: (tipe === 'cs' ? 'C S ' : 'Teller ') + nomor,
+                tujuan: tipe === 'cs' ? 'Customer Service' : 'Teller',
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            });
+        }
 
-            if (ytPlayer && typeof ytPlayer.playVideo === 'function') {
-                ytPlayer.setVolume(SETTING_VOLUME_VIDEO);
-                ytPlayer.playVideo();
+        function ulang(tipe) {
+            let nomor = tipe === 'cs' ? currentData.cs : currentData.teller;
+            if(nomor > 0) {
+                database.ref('panggilanTerakhir').set({
+                    nomorEjaan: (tipe === 'cs' ? 'C S ' : 'Teller ') + nomor,
+                    tujuan: tipe === 'cs' ? 'Customer Service' : 'Teller',
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                });
             }
         }
 
-        // 1. SINKRONISASI ANGKA ANTRIAN
-        database.ref('antrean/cs').on('value', (snapshot) => {
-            const val = snapshot.val() || 0;
-            document.getElementById('display-cs').innerText = 'CS-' + String(val).padStart(3, '0');
-        });
-
-        database.ref('antrean/teller').on('value', (snapshot) => {
-            const val = snapshot.val() || 0;
-            document.getElementById('display-teller').innerText = 'TL-' + String(val).padStart(3, '0');
-        });
-
-        // 2. SINKRONISASI TEKS PENGUMUMAN BERJALAN
-        database.ref('antrean/pengumumanMulti').on('value', (snapshot) => {
-            let listTeks = [];
-            if (snapshot.exists()) listTeks = Object.values(snapshot.val());
-            if (listTeks.length === 0) {
-                listTeks.push('Selamat Datang di PT. Bank SUMUT KCP Pangkalan Brandan.');
-                listTeks.push('Kepercayaan Anda adalah Prioritas Kami.');
-            }
-            document.getElementById('marquee-text').innerText = listTeks.join('   •   ');
-        });
-
-        // 3. SINKRONISASI PLAYLIST VIDEO
-        database.ref('antrean/videos').on('value', (snapshot) => {
-            currentVideos = [];
-            if (snapshot.exists()) currentVideos = Object.values(snapshot.val());
-            if (currentVideos.length === 0) currentVideos.push('dQw4w9WgXcQ'); 
-            
-            if (ytPlayer && typeof ytPlayer.cuePlaylist === 'function' && !isPlayingNationalAnthem) {
-                const currentVideoId = ytPlayer.getVideoData()['video_id'];
-                if (currentVideoId !== currentVideos[0]) {
-                    ytPlayer.loadPlaylist(currentVideos, 0, 0);
-                    ytPlayer.setVolume(SETTING_VOLUME_VIDEO);
-                }
-            }
-        });
-
-        // PENGATUR JAM & SCHEDULER INDONESIA RAYA
-        setInterval(() => {
-            const sekarang = new Date();
-            const waktuWIB = sekarang.toLocaleTimeString('id-ID', { timeZone: 'Asia/Jakarta', hour12: false });
-            document.getElementById('jam').innerText = waktuWIB;
-
-            if (waktuWIB === "10:00:00" && !isPlayingNationalAnthem) {
-                jalankanIndonesiaRaya();
-            }
-        }, 1000);
-
-        function jalankanIndonesiaRaya() {
-            if (!ytPlayer || typeof ytPlayer.loadVideoById !== 'function') return;
-            isPlayingNationalAnthem = true;
-            ytPlayer.setVolume(100);
-            ytPlayer.loadVideoById(idIndonesiaRaya);
-
-            setTimeout(() => {
-                isPlayingNationalAnthem = false;
-                ytPlayer.setVolume(SETTING_VOLUME_VIDEO);
-                ytPlayer.loadPlaylist(currentVideos, 0, 0);
-            }, durasiLaguMilidetik);
-        }
-
-        // SUARA PANGGILAN ANTRIAN DENGAN PERBAIKAN STABILITAS CHROME
-        database.ref('panggilanTerakhir').on('value', (snapshot) => {
-            const data = snapshot.val();
-            if (data && data.timestamp > window.loadedTime) {
-                suaraPanggilan(data.nomorEjaan, data.tujuan);
-            }
-        });
-
-        function suaraPanggilan(nomor, tujuan) {
-            try {
-                window.speechSynthesis.cancel(); 
-                
-                const teks = `Nomor antrean, ${nomor}, silahkan menuju ke, ${tujuan}`;
-                
-                // Perbaikan utama: Mengunci ke window global agar tidak dihapus memori browser saat bersuara
-                window.currentUtterance = new SpeechSynthesisUtterance(teks);
-                window.currentUtterance.lang = 'id-ID';
-                window.currentUtterance.rate = 0.85;
-                window.currentUtterance.volume = 1.0; 
-
-                // Event ketika panggilan dimulai
-                window.currentUtterance.onstart = function() {
-                    if (ytPlayer && typeof ytPlayer.pauseVideo === 'function' && !isPlayingNationalAnthem) {
-                        ytPlayer.pauseVideo();
-                    }
-                };
-
-                // Event ketika panggilan selesai berbicara
-                window.currentUtterance.onend = function() {
-                    if (ytPlayer && typeof ytPlayer.playVideo === 'function' && !isPlayingNationalAnthem) {
-                        ytPlayer.playVideo();
-                    }
-                };
-
-                // Event tambahan penanganan kegagalan/interupsi suara
-                window.currentUtterance.onerror = function() {
-                    if (ytPlayer && typeof ytPlayer.playVideo === 'function' && !isPlayingNationalAnthem) {
-                        ytPlayer.playVideo();
-                    }
-                };
-
-                window.speechSynthesis.speak(window.currentUtterance);
-            } catch(e){
-                console.error("Kesalahan SpeechSynthesis:", e);
+        function konfirmasiResetHarian() {
+            if(confirm("Kembalikan nomor antrean ke 0 untuk pagi ini? (Daftar video & teks pengumuman Anda tetap aman)")) {
+                database.ref('antrean/cs').set(0);
+                database.ref('antrean/teller').set(0);
+                alert('Nomor antrean berhasil di-reset ke 0!');
             }
         }
     </script>
