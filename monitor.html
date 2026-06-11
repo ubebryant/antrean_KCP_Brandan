@@ -6,7 +6,7 @@
     <title>Monitor Antrean - PT. Bank SUMUT</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght=700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
         .font-digital { font-family: 'Orbitron', sans-serif; }
     </style>
 </head>
@@ -20,16 +20,14 @@
                 </svg>
             </div>
             <h3 class="text-xl font-black text-slate-800 mb-2">AKTIFKAN SUARA MONITOR</h3>
-            <p class="text-sm text-slate-500 mb-6">Browser memblokir suara otomatis demi privasi. Klik tombol di bawah ini agar suara panggilan antrean dan video TV aktif bersuara.</p>
+            <p class="text-sm text-slate-500 mb-6">Klik tombol di bawah ini agar suara panggilan antrean dan video TV aktif bersuara lancar.</p>
             <button onclick="unlockAudio()" class="w-full bg-[#00205B] text-white font-bold py-4 rounded-xl shadow-lg hover:bg-blue-950 transition active:scale-95 cursor-pointer tracking-wide">IZINKAN & AKTIFKAN SUARA</button>
         </div>
     </div>
 
     <header class="h-[10vh] min-h-[60px] bg-white px-6 shadow-md flex justify-between items-center border-b-2 border-slate-200 z-10 flex-shrink-0 box-border">
         <div class="flex items-center gap-4 h-full py-2">
-            <img src="Logo_Bank_Sumut.png" 
-                 alt="Logo Bank SUMUT" 
-                 class="h-full max-h-[50px] md:max-h-[60px] w-auto object-contain">
+            <img src="Logo_Bank_Sumut.png" alt="Logo Bank SUMUT" class="h-full max-h-[50px] md:max-h-[60px] w-auto object-contain">
             <div class="h-8 w-[2px] bg-slate-300"></div>
             <div>
                 <h1 class="text-lg md:text-xl font-black tracking-tighter text-[#00205B] leading-none">KANTOR CABANG</h1>
@@ -42,13 +40,12 @@
     <div class="h-[7vh] min-h-[40px] bg-[#00205B] text-white px-6 flex items-center shadow-md border-b-4 border-[#F37021] z-10 flex-shrink-0 box-border">
         <div class="bg-[#F37021] text-white font-black px-3 py-1 rounded-md text-[11px] md:text-xs shrink-0 mr-4 shadow-md tracking-wide">INFO TERKINI</div>
         <div class="flex-grow overflow-hidden flex items-center">
-            <marquee id="marquee-text" class="text-sm md:text-lg font-bold tracking-wide italic text-orange-300">Selamat Datang di PT. Bank SUMUT. Kepercayaan Anda adalah Prioritas Kami.</marquee>
+            <marquee id="marquee-text" class="text-sm md:text-lg font-bold tracking-wide italic text-orange-300">Selamat Datang di PT. Bank SUMUT.</marquee>
         </div>
     </div>
 
     <main class="h-[83vh] p-4 grid grid-cols-1 lg:grid-cols-12 gap-4 flex-shrink-0 box-border overflow-hidden">
         <div class="lg:col-span-4 flex flex-col gap-4 h-full overflow-hidden box-border">
-            
             <div class="flex-1 bg-white rounded-[1.5rem] shadow-xl border-l-[10px] border-emerald-500 p-4 flex flex-col justify-between items-center overflow-hidden box-border">
                 <h2 class="text-sm md:text-base font-black text-slate-400 uppercase tracking-widest text-center">CUSTOMER SERVICE</h2>
                 <div class="bg-slate-50 w-full flex-grow flex justify-center items-center shadow-inner my-2 rounded-2xl min-h-[50px] overflow-hidden">
@@ -97,103 +94,11 @@
         const database = firebase.database();
         window.loadedTime = Date.now();
 
+        let currentVideos = [];
         let urlPlaylistNormal = ""; 
         let isPlayingNationalAnthem = false;
 
         const idIndonesiaRaya = "eZgZ9eeS6Hk"; 
         const durasiLaguMilidetik = 150000; 
 
-        // Fungsi Aktivasi Player dan Mengatasi Masalah Autoplay Policy
         function unlockAudio() {
-            document.getElementById('audio-unlocker').classList.add('opacity-0', 'pointer-events-none');
-            
-            // Trigger pancingan suara kosong Speech Synthesis
-            try {
-                const triggerUtterance = new SpeechSynthesisUtterance("");
-                window.speechSynthesis.speak(triggerUtterance);
-            } catch(e){}
-
-            // Muat ulang isi player YouTube agar sinkron
-            if(urlPlaylistNormal && !isPlayingNationalAnthem) {
-                document.getElementById('youtube-player').src = urlPlaylistNormal;
-            }
-        }
-
-        // Sinkronisasi data real-time display TV
-        database.ref('antrean').on('value', (snapshot) => {
-            const data = snapshot.val() || {};
-            
-            document.getElementById('display-cs').innerText = 'CS-' + String(data.cs || 0).padStart(3, '0');
-            document.getElementById('display-teller').innerText = 'TL-' + String(data.teller || 0).padStart(3, '0');
-
-            // Teks Multi Informasi
-            let listTeks = [];
-            if (data.pengumumanMulti) listTeks = Object.values(data.pengumumanMulti);
-            if (listTeks.length === 0) {
-                listTeks.push('Selamat Datang di PT. Bank SUMUT KCP Pangkalan Brandan.');
-                listTeks.push('Kepercayaan Anda adalah Prioritas Kami.');
-            }
-            document.getElementById('marquee-text').innerText = listTeks.join('   •   ');
-
-            // Ambil Data Multi Video Link
-            let listVideo = [];
-            if (data.videos) listVideo = Object.values(data.videos);
-            if (listVideo.length === 0) listVideo.push('dQw4w9WgXcQ'); 
-            
-            const videoUtama = listVideo[0];
-            const stringPlaylist = listVideo.join(',');
-
-            // SEKARANG MUTE KITA ATUR KE 0 (SUARA AKAN KELUAR)
-            urlPlaylistNormal = `https://www.youtube.com/embed/${videoUtama}?autoplay=1&mute=0&loop=1&playlist=${stringPlaylist}&controls=0&rel=0`;
-            
-            if (!isPlayingNationalAnthem) {
-                const player = document.getElementById('youtube-player');
-                if(player.src !== urlPlaylistNormal) {
-                    player.src = urlPlaylistNormal;
-                }
-            }
-        });
-
-        // Pengatur Jam internal & Scheduler Jam 10 Pagi
-        setInterval(() => {
-            const sekarang = new Date();
-            const waktuWIB = sekarang.toLocaleTimeString('id-ID', { timeZone: 'Asia/Jakarta', hour12: false });
-            document.getElementById('jam').innerText = waktuWIB;
-
-            if (waktuWIB === "10:00:00" && !isPlayingNationalAnthem) {
-                jalankanIndonesiaRaya();
-            }
-        }, 1000);
-
-        function jalankanIndonesiaRaya() {
-            isPlayingNationalAnthem = true;
-            const player = document.getElementById('youtube-player');
-            player.src = `https://www.youtube.com/embed/${idIndonesiaRaya}?autoplay=1&mute=0&controls=0&rel=0`;
-
-            setTimeout(() => {
-                isPlayingNationalAnthem = false;
-                player.src = urlPlaylistNormal; 
-            }, durasiLaguMilidetik);
-        }
-
-        // Suara Panggilan Masuk Suara Google Text-to-Speech
-        database.ref('panggilanTerakhir').on('value', (snapshot) => {
-            const data = snapshot.val();
-            if (data && data.timestamp > window.loadedTime) {
-                suaraPanggilan(data.nomorEjaan, data.tujuan);
-            }
-        });
-
-        function suaraPanggilan(nomor, tujuan) {
-            try {
-                window.speechSynthesis.cancel(); 
-                const teks = `Nomor antrean, ${nomor}, silahkan menuju ke, ${tujuan}`;
-                const utterance = new SpeechSynthesisUtterance(teks);
-                utterance.lang = 'id-ID';
-                utterance.rate = 0.85;
-                window.speechSynthesis.speak(utterance);
-            } catch(e){}
-        }
-    </script>
-</body>
-</html>
