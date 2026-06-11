@@ -65,9 +65,15 @@
                     <input id="input-url-youtube" type="text" class="flex-grow p-3 bg-gray-50 border rounded-xl text-sm font-semibold text-gray-700" placeholder="Paste link video atau ID di sini...">
                     <button onclick="tambahVideo()" class="bg-blue-900 text-white font-bold px-4 rounded-xl hover:bg-blue-950 cursor-pointer text-xs">TAMBAH</button>
                 </div>
+                
                 <label class="block text-[11px] font-bold text-gray-400 mb-1">Daftar Video Aktif di TV:</label>
-                <div id="list-playlist-video" class="space-y-2 max-h-[110px] overflow-y-auto border p-2 rounded-xl bg-gray-50 mb-6 text-xs text-gray-600">
+                <div id="list-playlist-video" class="space-y-2 max-h-[110px] overflow-y-auto border p-2 rounded-xl bg-gray-50 text-xs text-gray-600">
                     <p class="text-gray-400 italic">Memuat video cloud...</p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2 mt-2 mb-6">
+                    <button id="btn-pause" onclick="setPlaybackStatus('paused')" class="bg-amber-500 hover:bg-amber-600 text-white text-[11px] font-bold py-2 rounded-xl shadow-sm transition active:scale-95 cursor-pointer flex justify-center items-center gap-1">⏸️ PAUSE VIDEO</button>
+                    <button id="btn-resume" onclick="setPlaybackStatus('playing')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold py-2 rounded-xl shadow-sm transition active:scale-95 cursor-pointer flex justify-center items-center gap-1">▶️ RESUME VIDEO</button>
                 </div>
 
                 <hr class="my-4 border-gray-200">
@@ -114,6 +120,16 @@
                 currentData.cs = data.cs || 0;
                 currentData.teller = data.teller || 0;
                 rawVideoObjects = data.videos || {};
+                
+                // Beri efek visual aktif pada tombol pause/resume berdasarkan status cloud
+                const currentStatus = data.videoStatus || 'playing';
+                if(currentStatus === 'paused') {
+                    document.getElementById('btn-pause').className = "bg-amber-700 text-white text-[11px] font-bold py-2 rounded-xl shadow-inner border border-amber-900 pointer-events-none flex justify-center items-center gap-1";
+                    document.getElementById('btn-resume').className = "bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold py-2 rounded-xl shadow-sm cursor-pointer flex justify-center items-center gap-1";
+                } else {
+                    document.getElementById('btn-pause').className = "bg-amber-500 hover:bg-amber-600 text-white text-[11px] font-bold py-2 rounded-xl shadow-sm cursor-pointer flex justify-center items-center gap-1";
+                    document.getElementById('btn-resume').className = "bg-emerald-800 text-white text-[11px] font-bold py-2 rounded-xl shadow-inner border border-emerald-950 pointer-events-none flex justify-center items-center gap-1";
+                }
             }
             
             document.getElementById('live-cs').innerText = 'CS-' + String(currentData.cs || 0).padStart(3, '0');
@@ -165,6 +181,10 @@
             }
         });
 
+        function setPlaybackStatus(status) {
+            database.ref('antrean/videoStatus').set(status);
+        }
+
         function ekstrakIDYouTube(url) {
             url = url.trim();
             const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
@@ -180,7 +200,10 @@
             const idVideo = ekstrakIDYouTube(rawValue);
 
             if (idVideo) {
-                database.ref('antrean/videos').push(idVideo).then(() => { input.value = ""; });
+                database.ref('antrean/videos').push(idVideo).then(() => { 
+                    input.value = ""; 
+                    database.ref('antrean/videoStatus').set('playing'); // otomatis play jika tambah baru
+                });
             } else { alert("Format link tidak valid!"); }
         }
 
@@ -204,6 +227,7 @@
             });
 
             database.ref('antrean/videos').set(playlistBaru);
+            database.ref('antrean/videoStatus').set('playing'); // Otomatis force-play video terpilih
         }
 
         function nextVideo() {
@@ -226,9 +250,10 @@
             });
 
             const randomKeyTerakhir = 'key_' + Math.random().toString(36).substr(2, 9);
-            playlistBaru[randomKeyTerakhir] = idVideoFirst;
+            playlistBaru[randomKeyTerakhir] = idVideoPertama;
 
             database.ref('antrean/videos').set(playlistBaru);
+            database.ref('antrean/videoStatus').set('playing'); // Otomatis jalan
         }
 
         function tambahPengumuman() {

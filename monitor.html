@@ -90,9 +90,10 @@
         window.loadedTime = Date.now();
 
         let ytPlayer;
-        let currentVideos = ['c9slVkM8km0']; // DEFAULT BARU TERPASANG
+        let currentVideos = ['c9slVkM8km0']; 
         let isPlayingNationalAnthem = false;
         let isUnlocked = false;
+        let currentPlaybackState = 'playing'; // Default awal berjalan
 
         const idIndonesiaRaya = "eZgZ9eeS6Hk"; 
         const durasiLaguMilidetik = 150000;
@@ -121,7 +122,11 @@
         }
 
         function onPlayerReady(event) {
-            event.target.playVideo();
+            if(currentPlaybackState === 'playing') {
+                event.target.playVideo();
+            } else {
+                event.target.pauseVideo();
+            }
             if (isUnlocked) {
                 event.target.unMute();
                 event.target.setVolume(SETTING_VOLUME_VIDEO);
@@ -139,7 +144,9 @@
             if (ytPlayer && typeof ytPlayer.playVideo === 'function') {
                 ytPlayer.unMute();
                 ytPlayer.setVolume(SETTING_VOLUME_VIDEO);
-                ytPlayer.playVideo();
+                if(currentPlaybackState === 'playing') {
+                    ytPlayer.playVideo();
+                }
             }
         }
 
@@ -169,7 +176,7 @@
         database.ref('antrean/videos').on('value', (snapshot) => {
             currentVideos = [];
             if (snapshot.exists()) currentVideos = Object.values(snapshot.val());
-            if (currentVideos.length === 0) currentVideos.push('c9slVkM8km0'); // DEFAULT BARU JIKA FIREBASE KOSONG
+            if (currentVideos.length === 0) currentVideos.push('c9slVkM8km0'); 
             
             if (ytPlayer && typeof ytPlayer.cuePlaylist === 'function' && !isPlayingNationalAnthem) {
                 const currentVideoId = ytPlayer.getVideoData()['video_id'];
@@ -179,6 +186,25 @@
                         ytPlayer.unMute();
                         ytPlayer.setVolume(SETTING_VOLUME_VIDEO);
                     }
+                    // Pertahankan status pause/play setelah ganti playlist
+                    setTimeout(() => {
+                        if(currentPlaybackState === 'paused' && typeof ytPlayer.pauseVideo === 'function') {
+                            ytPlayer.pauseVideo();
+                        }
+                    }, 500);
+                }
+            }
+        });
+
+        // 4. SINKRONISASI TOMBOL PAUSE / RESUME DARI PANEL CLOUD
+        database.ref('antrean/videoStatus').on('value', (snapshot) => {
+            currentPlaybackState = snapshot.val() || 'playing';
+            
+            if (ytPlayer && !isPlayingNationalAnthem) {
+                if (currentPlaybackState === 'paused' && typeof ytPlayer.pauseVideo === 'function') {
+                    ytPlayer.pauseVideo();
+                } else if (currentPlaybackState === 'playing' && typeof ytPlayer.playVideo === 'function') {
+                    ytPlayer.playVideo();
                 }
             }
         });
@@ -186,7 +212,7 @@
         // PENGATUR JAM & SCHEDULER INDONESIA RAYA
         setInterval(() => {
             const sekarang = new Date();
-            const waktuWIB = sekarang.toLocaleTimeString('id-ID', { timeZone: 'Asia/Jakarta', hour12: false });
+            const waktuWIB = Thermal = sekarang.toLocaleTimeString('id-ID', { timeZone: 'Asia/Jakarta', hour12: false });
             document.getElementById('jam').innerText = waktuWIB;
 
             if (waktuWIB === "10:00:00" && !isPlayingNationalAnthem) {
@@ -209,6 +235,12 @@
                     ytPlayer.mute();
                 }
                 ytPlayer.loadPlaylist(currentVideos, 0, 0);
+                
+                // Jika pas jam 10 statusnya lagi pause, kembalikan ke kondisi ter-pause
+                setTimeout(() => {
+                    if(currentPlaybackState === 'paused') ytPlayer.pauseVideo();
+                }, 500);
+
             }, durasiLaguMilidetik);
         }
 
@@ -238,13 +270,14 @@
                 };
 
                 window.currentUtterance.onend = function() {
-                    if (ytPlayer && typeof ytPlayer.playVideo === 'function' && !isPlayingNationalAnthem) {
+                    // Hanya putar kembali video jika statusnya TIDAK sedang di-pause oleh petugas
+                    if (ytPlayer && typeof ytPlayer.playVideo === 'function' && !isPlayingNationalAnthem && currentPlaybackState === 'playing') {
                         ytPlayer.playVideo();
                     }
                 };
 
                 window.currentUtterance.onerror = function() {
-                    if (ytPlayer && typeof ytPlayer.playVideo === 'function' && !isPlayingNationalAnthem) {
+                    if (ytPlayer && typeof ytPlayer.playVideo === 'function' && !isPlayingNationalAnthem && currentPlaybackState === 'playing') {
                         ytPlayer.playVideo();
                     }
                 };
